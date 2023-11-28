@@ -442,39 +442,64 @@
           <GroupName>Source Code</GroupName>
           <Files>
             <File>
+              <FileName>linea_serie_hal.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\linea_serie_hal.h</FilePath>
+            </File>
+            <File>
+              <FileName>linea_serie_hal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\linea_serie_hal.c</FilePath>
+            </File>
+            <File>
+              <FileName>linea_serie_drv.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\linea_serie_drv.h</FilePath>
+            </File>
+            <File>
+              <FileName>linea_serie_drv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\linea_serie_drv.c</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
             </File>
             <File>
-              <FileName>Power_management.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Power_management.c</FilePath>
-            </File>
-            <File>
-              <FileName>Power_management.h</FileName>
+              <FileName>fifo.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\Power_management.h</FilePath>
+              <FilePath>.\fifo.h</FilePath>
             </File>
             <File>
-              <FileName>boton_eint0.c</FileName>
+              <FileName>fifo.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\boton_eint0.c</FilePath>
+              <FilePath>.\fifo.c</FilePath>
             </File>
             <File>
-              <FileName>boton_eint0.h</FileName>
+              <FileName>gpio_hal.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\boton_eint0.h</FilePath>
+              <FilePath>.\gpio_hal.h</FilePath>
             </File>
             <File>
-              <FileName>timer0.c</FileName>
+              <FileName>eventos.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\eventos.h</FilePath>
+            </File>
+            <File>
+              <FileName>io_reserva.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\io_reserva.h</FilePath>
+            </File>
+            <File>
+              <FileName>planificador.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\planificador.h</FilePath>
+            </File>
+            <File>
+              <FileName>planificador.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\timer0.c</FilePath>
-            </File>
-            <File>
-              <FileName>timer0.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\timer0.h</FilePath>
+              <FilePath>.\planificador.c</FilePath>
             </File>
           </Files>
         </Group>
