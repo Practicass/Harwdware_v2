@@ -16,8 +16,8 @@ void planificador(){
 		//
     FIFO_inicializar(GPIO_OVERFLOW,GPIO_OVERFLOW_BITS);
 		alarma_inicializar(FIFO_encolar);
-		//hello_world_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS, GPIO_HAL_PIN_DIR_OUTPUT,FIFO_encolar, GPIO_HELLO_WORLD_BITS);
-		//visualizar_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS);
+		hello_world_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS, GPIO_HAL_PIN_DIR_OUTPUT,FIFO_encolar, GPIO_HELLO_WORLD_BITS);
+		visualizar_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS);
 		//
 		linea_serie_drv_inicializar(FIFO_encolar, ev_RX_SERIE,UART0_CARACTER,CONTINUAR_ENVIO,ev_TX_SERIE);
 		////juego_inicializar(FIFO_encolar);
@@ -42,7 +42,7 @@ void planificador(){
 				}else if(idEvento == ev_VISUALIZAR_HELLO){
 					visualizarHello(auxData);
 				}else if(idEvento == ev_VISUALIZAR_CUENTA){
-					//visualizarCuenta(auxData);
+					visualizarCuenta(auxData);
 				}else if(idEvento == ev_LATIDO){
 					hello_world_tratar_evento();
 				}if(idEvento == HELLOWORLD){

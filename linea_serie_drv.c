@@ -50,7 +50,7 @@ void linea_serie_drv_leer(uint8_t caracter){
     }else if(numEscritura >= 3){ // se han introducio más caracteres de los posibles
         almacenar = 0;
         //encender led error
-       // gpio_hal_escribir(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, 1);
+       // gpio_hal_escribir(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, 1); // hay que`pasarlo por parametro y callback
 
     }else if(almacenar){ // se almacena el caracter introducido 
         bufferEntrada[numEscritura] = caracter;
