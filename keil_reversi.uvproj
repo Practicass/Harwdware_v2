@@ -561,6 +561,36 @@
               <FileType>5</FileType>
               <FilePath>.\planificador.h</FilePath>
             </File>
+            <File>
+              <FileName>int_externas_hal.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\int_externas_hal.h</FilePath>
+            </File>
+            <File>
+              <FileName>int_externas_hal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\int_externas_hal.c</FilePath>
+            </File>
+            <File>
+              <FileName>botones.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\botones.h</FilePath>
+            </File>
+            <File>
+              <FileName>botones.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\botones.c</FilePath>
+            </File>
+            <File>
+              <FileName>juego.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\juego.c</FilePath>
+            </File>
+            <File>
+              <FileName>juego.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\juego.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

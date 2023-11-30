@@ -3,15 +3,15 @@
 
 static void (*callback_fifo_encolar)();
 static int GPIO_HELLO_WORLD_BITS;
-static uint32_t contHelloWorld;
+static uint32_t x;
 
 //actualiza el contador y el estado de los leds 
 void hello_world_tick_tack(){
 
 		//aumenta el contador
-    contHelloWorld= contHelloWorld+1;
-		if(contHelloWorld >= pow(2,GPIO_HELLO_WORLD_BITS)){
-			contHelloWorld=1;
+    x= x+1;
+		if(x >= pow(2,GPIO_HELLO_WORLD_BITS)){
+			x=1;
 		}
 			
 		
@@ -21,7 +21,7 @@ void hello_world_tick_tack(){
 //configura los pines correspondientes
 void hello_world_inicializar(GPIO_HAL_PIN_T gpio_inicial, uint8_t num_bits,  enum gpio_hal_pin_dir_t direccion, void (*callback_fifo_encolar_param)(), int GPIO_HELLO_WORLD_BITS_PARAM){
 	uint32_t periodo;	
-	contHelloWorld=1;
+	x=1;
 	GPIO_HELLO_WORLD_BITS = GPIO_HELLO_WORLD_BITS_PARAM;
 		
 	
@@ -46,5 +46,5 @@ void hello_world_inicializar(GPIO_HAL_PIN_T gpio_inicial, uint8_t num_bits,  enu
 void hello_world_tratar_evento(){
 	
 	hello_world_tick_tack(); // aumenta el contador
-	callback_fifo_encolar(ev_VISUALIZAR_HELLO,contHelloWorld); // encola el evento para visualizar y el valor a visualizar
+	callback_fifo_encolar(ev_VISUALIZAR_HELLO,x); // encola el evento para visualizar y el valor a visualizar
 }

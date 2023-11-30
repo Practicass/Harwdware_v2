@@ -20,7 +20,8 @@ void planificador(){
 		visualizar_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS);
 		//
 		linea_serie_drv_inicializar(FIFO_encolar, ev_RX_SERIE,UART0_CARACTER,CONTINUAR_ENVIO,ev_TX_SERIE);
-		////juego_inicializar(FIFO_encolar);
+		botones_init(FIFO_encolar,alarma_activar);
+		juego_inicializar(FIFO_encolar);
 		//
 		//alarma_activar(HELLOWORLD, 0x8000000a,0);
 	
@@ -45,8 +46,14 @@ void planificador(){
 					visualizarCuenta(auxData);
 				}else if(idEvento == ev_LATIDO){
 					hello_world_tratar_evento();
-				}if(idEvento == HELLOWORLD){
+				}else if(idEvento == HELLOWORLD){
 					hello_world_tick_tack();
+				}else if(idEvento == BOTON){
+					botones_pulsar(auxData);
+					alarma_activar(DEEP_SLEEP, USUARIO_AUSENTE, 0);
+					juego_tratar_evento(idEvento, auxData);
+				}else if(idEvento == BOTON_EINT1_ALARM || idEvento == BOTON_EINT2_ALARM){
+					botones_monitorizar(idEvento);
 				}
 		}else{
 			//power_hal_wait();

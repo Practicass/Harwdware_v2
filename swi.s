@@ -74,8 +74,8 @@ __read_IRQ_bit
     LDMFD SP!, {R8, R12}
     MRS R0, SPSR
     TST R0, #I_Bit
-    MOVEQ R0, #1
-    MOVNE R0, #0
+    MOVEQ R0, #0
+    MOVNE R0, #1
    
     LDMFD SP!, {R12, PC}^
 
