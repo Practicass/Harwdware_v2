@@ -50,8 +50,8 @@ void FIFO_encolar(EVENTO_T ID_evento, uint32_t auxData){
     uint32_t irq;
     irq = read_IRQ_bit();
     
-    if(irq != 0){
-       //disable_irq();
+    if(irq == 0){
+       disable_irq();
     }    
     
     if(cola.adelantado == 1 && cola.index_begin == cola.index_end){
@@ -66,8 +66,8 @@ void FIFO_encolar(EVENTO_T ID_evento, uint32_t auxData){
     }
 
     cola.contador[ID_evento]++; //aumenta contador
-    if(irq != 0){
-       //enable_irq();
+    if(irq == 0){
+       enable_irq();
     }    
   
 }
@@ -77,7 +77,7 @@ void FIFO_encolar(EVENTO_T ID_evento, uint32_t auxData){
 uint8_t FIFO_extraer(EVENTO_T *ID_evento, uint32_t* auxData){
 		uint32_t irq;
 		irq = read_IRQ_bit();
-		if(irq != 0){
+		if(irq == 0){
 			 disable_irq();
 		} 
     if(cola.index_begin != cola.index_end ){
@@ -89,13 +89,13 @@ uint8_t FIFO_extraer(EVENTO_T *ID_evento, uint32_t* auxData){
         if(cola.index_begin == 0){
             cola.adelantado = 0;
         }
-        if(irq != 0){
+        if(irq == 0){
             enable_irq();
         }
         
         return 1;
     }else{
-        if(irq != 0){
+        if(irq == 0){
             enable_irq();
         }
    
@@ -124,4 +124,3 @@ uint32_t FIFO_estadisticas(EVENTO_T ID_evento){
    
     
 }
-

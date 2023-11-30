@@ -5,7 +5,7 @@ static void (*callback_linea_serie_drv_leer)();
 static void (*callback_linea_serie_drv_escribir)();
 
 
-void linea_serie_ISR() __irq{
+void linea_serie_ISR(void) __irq{
     uint32_t iterrupcion = U0IIR;
     if((iterrupcion & 0x0e) == 4){
         callback_linea_serie_drv_leer(U0RBR);

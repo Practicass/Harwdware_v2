@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include "gpio_hal.h"
 #include "eventos.h"
-
+#include "swi.h"
 
 
 
@@ -30,3 +30,6 @@ uint32_t FIFO_estadisticas(EVENTO_T ID_evento);
 
 
 #endif
+
+
+

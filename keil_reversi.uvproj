@@ -442,26 +442,6 @@
           <GroupName>Source Code</GroupName>
           <Files>
             <File>
-              <FileName>linea_serie_hal.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\linea_serie_hal.h</FilePath>
-            </File>
-            <File>
-              <FileName>linea_serie_hal.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\linea_serie_hal.c</FilePath>
-            </File>
-            <File>
-              <FileName>linea_serie_drv.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\linea_serie_drv.h</FilePath>
-            </File>
-            <File>
-              <FileName>linea_serie_drv.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\linea_serie_drv.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
@@ -492,14 +472,94 @@
               <FilePath>.\io_reserva.h</FilePath>
             </File>
             <File>
-              <FileName>planificador.h</FileName>
+              <FileName>linea_serie_hal.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\planificador.h</FilePath>
+              <FilePath>.\linea_serie_hal.h</FilePath>
+            </File>
+            <File>
+              <FileName>linea_serie_hal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\linea_serie_hal.c</FilePath>
+            </File>
+            <File>
+              <FileName>linea_serie_drv.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\linea_serie_drv.h</FilePath>
+            </File>
+            <File>
+              <FileName>linea_serie_drv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\linea_serie_drv.c</FilePath>
             </File>
             <File>
               <FileName>planificador.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\planificador.c</FilePath>
+            </File>
+            <File>
+              <FileName>swi.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\swi.h</FilePath>
+            </File>
+            <File>
+              <FileName>swi.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\swi.s</FilePath>
+            </File>
+            <File>
+              <FileName>alarmas.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\alarmas.h</FilePath>
+            </File>
+            <File>
+              <FileName>alarmas.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\alarmas.c</FilePath>
+            </File>
+            <File>
+              <FileName>temporizador_drv.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\temporizador_drv.h</FilePath>
+            </File>
+            <File>
+              <FileName>temporizador_drv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\temporizador_drv.c</FilePath>
+            </File>
+            <File>
+              <FileName>temporizador_hal.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\temporizador_hal.h</FilePath>
+            </File>
+            <File>
+              <FileName>temporizador_hal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\temporizador_hal.c</FilePath>
+            </File>
+            <File>
+              <FileName>hello_world.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\hello_world.c</FilePath>
+            </File>
+            <File>
+              <FileName>hello_world.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\hello_world.h</FilePath>
+            </File>
+            <File>
+              <FileName>visualizar.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\visualizar.h</FilePath>
+            </File>
+            <File>
+              <FileName>visualizar.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\visualizar.c</FilePath>
+            </File>
+            <File>
+              <FileName>planificador.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\planificador.h</FilePath>
             </File>
           </Files>
         </Group>

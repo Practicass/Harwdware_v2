@@ -8,9 +8,10 @@
 
 
 
+
 int main(void){
-	
-	
+		
 	planificador();
 
 }
+
