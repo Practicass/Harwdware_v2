@@ -23,7 +23,9 @@ void planificador(){
 		botones_init(FIFO_encolar,alarma_activar);
 		juego_inicializar(FIFO_encolar);
 		//
-		//alarma_activar(HELLOWORLD, 0x8000000a,0);
+		WD_hal_inicializar(30);
+		WD_hal_feed();
+		//alarma_activar(DEEP_SLEEP, USUARIO_AUSENTE, 0);
 	
     while(idEvento != ALARMA_OVERFLOW){
 			//uint8_t hayEvento = 0; //descomentar comprobar overflow cola
@@ -40,6 +42,7 @@ void planificador(){
 					linea_serie_drv_continuar_envio();
 				}else if(idEvento  == ev_TX_SERIE){
 					//idEvento = idEvento;
+					WD_hal_feed();
 				}else if(idEvento == ev_VISUALIZAR_HELLO){
 					visualizarHello(auxData);
 				}else if(idEvento == ev_VISUALIZAR_CUENTA){
@@ -56,7 +59,7 @@ void planificador(){
 					botones_monitorizar(idEvento);
 				}
 		}else{
-			//power_hal_wait();
+			power_hal_wait();
 					
 		}
        

@@ -591,6 +591,26 @@
               <FileType>5</FileType>
               <FilePath>.\juego.h</FilePath>
             </File>
+            <File>
+              <FileName>power.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\power.h</FilePath>
+            </File>
+            <File>
+              <FileName>power.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\power.c</FilePath>
+            </File>
+            <File>
+              <FileName>wd_hal.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\wd_hal.h</FilePath>
+            </File>
+            <File>
+              <FileName>wd_hal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\wd_hal.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
