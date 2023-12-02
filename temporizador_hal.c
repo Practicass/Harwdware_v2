@@ -76,7 +76,7 @@ void timer1_ISR (void) __irq {
 void temporizador_hal_iniciar(){
 		timer1_int_count = 0;                   
 		//T1PR = 1510;
-		T1PR = 1500;
+		T1PR = 7500;
 		T1MCR = 3;
 		T1TCR = 0;
 		VICVectAddr5 = (unsigned long)timer1_ISR;

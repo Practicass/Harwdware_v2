@@ -3,7 +3,7 @@
 #include "wd_hal.h"
 
 void WD_hal_inicializar(int sec){
-    WDTC = sec * 1500000; // 1500 * 1000 ; 1000ms = 1s
+    WDTC = sec * 15000000/4; // 1500 * 1000 ; 1000ms = 1s
     WDMOD = 0x03;
 }
 

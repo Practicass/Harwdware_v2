@@ -154,6 +154,22 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
+          <LineNumber>21</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>2784</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>.\temporizador_hal.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\keil_reversi\temporizador_hal.c\21</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
           <LineNumber>41</LineNumber>
           <EnabledFlag>0</EnabledFlag>
           <Address>1856</Address>
@@ -168,7 +184,7 @@
           <Expression>\\keil_reversi\planificador.c\41</Expression>
         </Bp>
         <Bp>
-          <Number>1</Number>
+          <Number>2</Number>
           <Type>0</Type>
           <LineNumber>40</LineNumber>
           <EnabledFlag>0</EnabledFlag>
@@ -184,7 +200,7 @@
           <Expression>\\keil_reversi\planificador.c\40</Expression>
         </Bp>
         <Bp>
-          <Number>2</Number>
+          <Number>3</Number>
           <Type>0</Type>
           <LineNumber>0</LineNumber>
           <EnabledFlag>0</EnabledFlag>
@@ -200,7 +216,7 @@
           <Expression>\\keil_reversi\Startup.s\156</Expression>
         </Bp>
         <Bp>
-          <Number>3</Number>
+          <Number>4</Number>
           <Type>0</Type>
           <LineNumber>14</LineNumber>
           <EnabledFlag>1</EnabledFlag>
@@ -216,11 +232,11 @@
           <Expression>\\keil_reversi\main.c\14</Expression>
         </Bp>
         <Bp>
-          <Number>4</Number>
+          <Number>5</Number>
           <Type>0</Type>
           <LineNumber>6</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>4256</Address>
+          <Address>4232</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -230,22 +246,6 @@
           <Filename>.\wd_hal.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\keil_reversi\wd_hal.c\6</Expression>
-        </Bp>
-        <Bp>
-          <Number>5</Number>
-          <Type>0</Type>
-          <LineNumber>10</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>4284</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\wd_hal.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\keil_reversi\wd_hal.c\10</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
