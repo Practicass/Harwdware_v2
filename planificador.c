@@ -37,7 +37,9 @@ void planificador(){
 				}else if(idEvento == TIMER){
 					alarma_tratar_evento();
 				}else if(idEvento == ev_RX_SERIE){
-					linea_serie_drv_enviar_array(auxData);
+					
+					juego_tratar_evento(idEvento,auxData);
+					//linea_serie_drv_enviar_array(bufferSalidaPlan);
 				}else if(idEvento  == CONTINUAR_ENVIO){
 					linea_serie_drv_continuar_envio();
 				}else if(idEvento  == ev_TX_SERIE){

@@ -12,7 +12,7 @@ void linea_serie_drv_inicializar(void (*callback_fifo_encolar_param)(), uint8_t 
 
 void linea_serie_drv_leer(uint8_t caracter);
 
-void linea_serie_drv_enviar_array(uint32_t comando);
+void linea_serie_drv_enviar_array(uint8_t cadena[]);
 
 void linea_serie_drv_continuar_envio(void);
 

@@ -3,7 +3,7 @@
 #include "linea_serie_drv.h"
 
 const int MAXBUFFER = 3;
-const int MAXBUFFERSALIDA = 3;
+const int MAXBUFFERSALIDA = 300;
 
 static volatile uint8_t bufferEntrada[MAXBUFFER];
 static  int numEscritura = 0;
@@ -14,8 +14,9 @@ static volatile uint8_t evento_id_ev_RX_SERIE;
 static volatile uint8_t evento_id_UART0_CARACTER;
 static volatile uint8_t evento_id_CONTINUAR_ENVIO;
 static volatile uint8_t evento_id_ev_TX_SERIE;
-static volatile uint8_t bufferSalida[MAXBUFFERSALIDA];
-static volatile int contadorEscritura = 1; 
+static uint8_t bufferSalida[MAXBUFFERSALIDA];
+static int contadorEscritura = 1; 
+static unsigned int contadorAux = 0; 
 
 
 
@@ -30,7 +31,7 @@ void linea_serie_drv_inicializar(void (*callback_fifo_encolar_param)(), uint8_t 
 }
 
 void linea_serie_drv_leer(uint8_t caracter){
-    if(caracter == '$'){ // comenzará a almacenar en la siguiente interrupción
+    if(caracter == '$'){ // comenzarï¿½ a almacenar en la siguiente interrupciï¿½n
         almacenar = 1;
         numEscritura = 0;
        // if(gpio_hal_leer(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS) == 1){
@@ -47,7 +48,7 @@ void linea_serie_drv_leer(uint8_t caracter){
             callback_fifo_encolar(evento_id_ev_RX_SERIE, (bufferEntrada[0] << 16) | (bufferEntrada[1] << 8) | bufferEntrada[2]);
         //}
 
-    }else if(numEscritura >= 3){ // se han introducio más caracteres de los posibles
+    }else if(numEscritura >= 3){ // se han introducio mï¿½s caracteres de los posibles
         almacenar = 0;
         //encender led error
        // gpio_hal_escribir(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, 1);
@@ -58,13 +59,14 @@ void linea_serie_drv_leer(uint8_t caracter){
     }
 }
 
-void linea_serie_drv_enviar_array(uint32_t cadena){
+void linea_serie_drv_enviar_array(uint8_t cadena[]){
     // falta for
     // se separa la cadena entera en sus caracteres
-    bufferSalida[0] = (cadena >> 16 ) & 0xFF;
-    bufferSalida[1] = (cadena >> 8) & 0xFF;
-    bufferSalida[2] = cadena & 0xFF;
-
+		while(cadena[contadorAux] != '%'){
+			bufferSalida[contadorAux] = cadena[contadorAux];
+			contadorAux++;
+		}
+		
     
     // generar evento que llame a linea_serie_hal
     linea_serie_hal_escribir(bufferSalida[0]);    
@@ -75,7 +77,7 @@ void linea_serie_drv_enviar_array(uint32_t cadena){
 
 void linea_serie_drv_continuar_envio(){
 
-    if(contadorEscritura < MAXBUFFERSALIDA){
+    if(contadorEscritura < contadorAux){
         //callback_fifo_encolar(evento_id_UART0_CARACTER, bufferSalida[contadorEscritura]);
 			linea_serie_hal_escribir(bufferSalida[contadorEscritura]);
         contadorEscritura++;
@@ -84,6 +86,7 @@ void linea_serie_drv_continuar_envio(){
         // se genera el evento ev_TX_SERIE
         callback_fifo_encolar(evento_id_ev_TX_SERIE,0);
         contadorEscritura=1;
+		contadorAux = 0;
     }
     
 

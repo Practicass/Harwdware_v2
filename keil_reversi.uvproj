@@ -352,7 +352,7 @@
           <Cads>
             <interw>0</interw>
             <Optim>4</Optim>
-            <oTime>0</oTime>
+            <oTime>1</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>0</OneElfS>
             <Strict>0</Strict>
@@ -363,7 +363,7 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>0</v6Lang>
@@ -610,6 +610,66 @@
               <FileName>wd_hal.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\wd_hal.c</FilePath>
+            </File>
+            <File>
+              <FileName>conecta_K_2023.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\conecta_K_2023.c</FilePath>
+            </File>
+            <File>
+              <FileName>entrada.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\entrada.c</FilePath>
+            </File>
+            <File>
+              <FileName>tablero.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\tablero.c</FilePath>
+            </File>
+            <File>
+              <FileName>celda.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\celda.h</FilePath>
+            </File>
+            <File>
+              <FileName>conecta_K_2023.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\conecta_K_2023.h</FilePath>
+            </File>
+            <File>
+              <FileName>config_conecta_K.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\config_conecta_K.h</FilePath>
+            </File>
+            <File>
+              <FileName>entrada.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\entrada.h</FilePath>
+            </File>
+            <File>
+              <FileName>tablero.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tablero.h</FilePath>
+            </File>
+            <File>
+              <FileName>tablero_test.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tablero_test.h</FilePath>
+            </File>
+            <File>
+              <FileName>conecta_K_buscar_alineamiento_arm.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\conecta_K_buscar_alineamiento_arm.s</FilePath>
+            </File>
+            <File>
+              <FileName>conecta_K_hay_linea_arm_arm.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\conecta_K_hay_linea_arm_arm.s</FilePath>
+            </File>
+            <File>
+              <FileName>conecta_K_hay_linea_arm_c.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\conecta_K_hay_linea_arm_c.s</FilePath>
             </File>
           </Files>
         </Group>

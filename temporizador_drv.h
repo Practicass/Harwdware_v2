@@ -9,7 +9,9 @@
 #include "eventos.h"
 
 
-//uint64_t __SWI(0) clock_get_us(void);
+
+
+uint32_t __swi(0) clock_get_us(void);
 
 //funci?n que programa un contador para que pueda ser utilizado.
 void temporizador_drv_iniciar(void);
