@@ -43,7 +43,9 @@ void planificador(){
 				}else if(idEvento  == CONTINUAR_ENVIO){
 					linea_serie_drv_continuar_envio();
 				}else if(idEvento  == ev_TX_SERIE){
-					//idEvento = idEvento;
+					//idEvento = idEvento;	
+					uint32_t t2 = clock_get_us();
+					juego_tratar_evento(idEvento, t2);
 					WD_hal_feed();
 				}else if(idEvento == ev_VISUALIZAR_HELLO){
 					visualizarHello(auxData);

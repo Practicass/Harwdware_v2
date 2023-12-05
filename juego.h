@@ -13,5 +13,6 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData);
 
 
 void conecta_K_visualizar_tablero_juego(void);
+void tiempo_visualizar_tablero(uint32_t t2);
 
 void conecta_K_visualizar_tiempo(uint32_t num);

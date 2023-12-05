@@ -76,17 +76,19 @@ void timer1_ISR (void) __irq {
 void temporizador_hal_iniciar(){
 		timer1_int_count = 0;                   
 		//T1PR = 1510;
-		T1PR = 7500;
+		T1PR = 14999;
 		T1MCR = 3;
 		T1TCR = 0;
 		VICVectAddr5 = (unsigned long)timer1_ISR;
 		VICVectCntl5 = 0x20 | 5;
+		T1MR0 = 0;
+
 
 
 }
 
 uint64_t temporizador_hal_leer(){
-    return timer1_int_count *periodoAux*TEMPORIZADOR_HAL_TICKS2US + T1TC*TEMPORIZADOR_HAL_TICKS2US + T1PC;
+    return timer1_int_count *periodoAux*14999 + T1PC;
 }
 
 uint64_t temporizador_hal_parar(){
@@ -96,9 +98,9 @@ uint64_t temporizador_hal_parar(){
 }
 
 void temporizador_hal_empezar(){
+			T1TCR = 1;
     VICIntEnable = VICIntEnable | 0x20;
-		T1TCR = 1;
-		T1MR0 = 1;
+
 }
 
 //funci?n dependiente del hardware (timer1)
@@ -108,6 +110,7 @@ void temporizador_hal_empezar(){
 void temporizador_hal_reloj (uint32_t periodo, void
 (*funcion_callback)()){
 	funcion_callback2 = funcion_callback;
+	periodoAux = periodo;
 	T1MR0 = periodo;
 
 }

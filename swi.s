@@ -56,12 +56,12 @@ SWI_Dead        B       SWI_Dead               ; None Existing SWI
 SWI_Cnt         EQU    (SWI_End-SWI_Table)/4
 SWI_Count       DCD     SWI_Cnt
 
-;                IMPORT  __SWI_0
+                IMPORT  __SWI_0
 ;               IMPORT  __SWI_1
 ;               IMPORT  __SWI_2
 ;               IMPORT  __SWI_3
 SWI_Table
-;                DCD     __SWI_0                ; SWI 0 Function Entry
+                DCD     __SWI_0                ; SWI 0 Function Entry
 ;               DCD     __SWI_1                ; SWI 1 Function Entry
 ;               DCD     __SWI_2                ; SWI 2 Function Entry
 ;               DCD     __SWI_3                ; SWI 3 Function Entry
