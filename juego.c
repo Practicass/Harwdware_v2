@@ -9,8 +9,27 @@ static void (*callback_fifo_encolar)();
 static uint8_t salida[8][8];
 static TABLERO cuadricula;
 static uint32_t t1;
-int last_command_tab = 0; // boolean
+static int last_command_tab = 0; // boolean
 
+enum ESTADOS{ 
+	PAG_PRINCIPAL = 0,
+    ESCRITURA_PAG_PRINCIPAL = 1,
+    WAIT_INICIO_PARTIDA = 2,
+    //MOSTRAR_TABLERO = 3,
+     ESCRITURA_MOSTRAR_TABLERO = 4,
+    WAIT_COMANDO = 5,
+	MOSTRAR_ERROR = 6,
+	ESCRITURA_MOSTAR_ERROR = 7,
+	MOSTRAR_FIN = 8,
+	ESCRITURA_MOSTRAR_FIN = 9,
+	COMANDO_CORRECTO = 10,
+	ESCRITURA_COMANDO_CORRECTO = 11,
+	WAIT_CANCELAR = 12,
+	CANCELADO = 13,
+	REALIZAR_COMANDO = 14
+	}
+
+static  state = PAG_PRINCIPAL;
 void juego_inicializar(void (*callback_fifo_encolar_param)()){
 	cuenta = 0;
 	intervalo = 0;
@@ -19,54 +38,109 @@ void juego_inicializar(void (*callback_fifo_encolar_param)()){
 
 
 	tablero_inicializar(&cuadricula);
-	conecta_K_test_cargar_tablero(&cuadricula);
+	conecta_K_test_cargar_tablero(&cuadricula); // igual habra que comentarlo, auqne en el enunciado habla algo sobre ello 
+
+
+	char bufferMsgIni[800] = {
+	'*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','\n',
+    '\t', 'C', 'O', 'N', 'E', 'C', 'T', 'A', ' ', 'K', '\n',
+    'P', 'U', 'L', 'S', 'E', ' ', 'U', 'N', ' ', 'B', 'O', 'T', 'O', 'N', ' ', 'P', 'A', 'R', 'A', ' ', 'I', 'N', 'I', 'C', 'I', 'A', 'R', '\n', 
+    'O', ' ', 'E', 'S', 'C', 'R', 'I', 'B', 'A', ' ', 'E', 'L', ' ', 'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '$','N', 'E', 'W','!', '\n',
+    'P', 'A', 'R', 'A', ' ', 'R', 'E', 'A', 'L', 'I', 'Z', 'A', 'R', ' ',
+    'U', 'N', 'A', ' ', 'J', 'U', 'G', 'A', 'D', 'A', ' \n', 'D', 'E', 'B', 'E', ' ',
+    'I', 'N', 'T', 'R', 'O', 'D', 'U', 'C', 'I', 'R', ' ', 'E','L',' ','\n',
+	'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '(', '$', '#', '-', '#', '!', ')','\n',
+	 'P', 'A', 'R', 'A', ' ', 'F', 'I', 'N', 'A', 'L', 'I', 'Z', 'A', 'R', ' ',
+    'L', 'A', ' ', 'P', 'A', 'R', 'T', 'I', 'D', 'A', '\n',
+	'P', 'U', 'L', 'S', 'E', ' ','E', 'L', ' ', 'B', 'O', 'T', 'O', 'N', ' ', '2', ' ', 'O', '\n', 'I', 'N', 'T', 'R', 'O', 'D', 'U', 'Z', 'C', 'A', ' ', 'E', 'L', ' ',
+	 'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '$', 'E', 'N', 'D', '!','\n',
+	'*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','\n','%'
+	};
+	state = ESCRITURA_PAG_PRINCIPAL;
+	linea_serie_drv_enviar_array(bufferMsgIni);
 
 
 
 }
 
 void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
-	if (ID_evento == ev_RX_SERIE){
-		uint8_t bufferTratarEvento[5];
-		bufferTratarEvento[0] = (auxData >> 16 ) & 0xFF;
-		bufferTratarEvento[1] = (auxData >> 8) & 0xFF;
-		bufferTratarEvento[2] = (auxData) & 0xFF;
-		bufferTratarEvento[3] = '\n';
-		bufferTratarEvento[4] = '%';
-		if((bufferTratarEvento[0] == 'E' && bufferTratarEvento[1] == 'N'&& bufferTratarEvento[2] == 'D')||(bufferTratarEvento[0] == 'N' && bufferTratarEvento[1] == 'E'&& bufferTratarEvento[2] == 'W')||
-			(bufferTratarEvento[0] >= '1' && bufferTratarEvento[0] <= '7' && bufferTratarEvento[1] == '-' && bufferTratarEvento[2] >= '1' && bufferTratarEvento[2] <= '7')){
-				linea_serie_drv_enviar_array(bufferTratarEvento);
-
-		}else if((bufferTratarEvento[0] == 'T' && bufferTratarEvento[1] == 'A'&& bufferTratarEvento[2] == 'B')){
-			last_command_tab = 1;
+	if (state == ESCRITURA_PAG_PRINCIPAL)
+	{
+		state = WAIT_INICIO_PARTIDA;
+	}else if (state == WAIT_INICIO_PARTIDA )
+	{
+		if (ID_evento == ev_RX_SERIE){ 
+			uint8_t bufferTratarEvento[5];
+			bufferTratarEvento[0] = (auxData >> 16 ) & 0xFF;
+			bufferTratarEvento[1] = (auxData >> 8) & 0xFF;
+			bufferTratarEvento[2] = (auxData) & 0xFF;
+			bufferTratarEvento[3] = '\n';
+			bufferTratarEvento[4] = '%';
+			if((bufferTratarEvento[0] == 'N' && bufferTratarEvento[1] == 'E'&& bufferTratarEvento[2] == 'W')){
+				//linea_serie_drv_enviar_array(bufferTratarEvento); //preguntar si hay que mostrar el comando
+				conecta_K_visualizar_tablero_juego();
+				state = ESCRITURA_MOSTRAR_TABLERO;
+			}
+		}else if(ID_evento == BOTON){
+			if (primeraVez == 0){
+				primeraVez = 1;
+			}else{
+				uint64_t tiempo_actual;
+				tiempo_actual = temporizador_drv_leer();
+				intervalo = tiempo_actual - ultimaPulsacion;
+				ultimaPulsacion = tiempo_actual;
+			}
 			conecta_K_visualizar_tablero_juego();
-		}
-	}else if(ID_evento == BOTON){
-		if (primeraVez == 0){
-			primeraVez = 1;
-		}else{
-			uint64_t tiempo_actual;
-			tiempo_actual = temporizador_drv_leer();
-			intervalo = tiempo_actual - ultimaPulsacion;
-			ultimaPulsacion = tiempo_actual;
-		}
-
-
-		if(auxData == 1){
-			cuenta++;
-		}else{
-			cuenta--;
-		}
-		callback_fifo_encolar(ev_VISUALIZAR_CUENTA, cuenta);
-	}else if(ID_evento == ev_TX_SERIE){
-		if(last_command_tab == 1){
-			last_command_tab = 0;
-			conecta_K_visualizar_tiempo(auxData-t1);
+			state = ESCRITURA_MOSTRAR_TABLERO;
 		}
 	}
-
+	
+	
+	
 
 }
+
+// if (ID_evento == ev_RX_SERIE){
+	// 	uint8_t bufferTratarEvento[5];
+	// 	bufferTratarEvento[0] = (auxData >> 16 ) & 0xFF;
+	// 	bufferTratarEvento[1] = (auxData >> 8) & 0xFF;
+	// 	bufferTratarEvento[2] = (auxData) & 0xFF;
+	// 	bufferTratarEvento[3] = '\n';
+	// 	bufferTratarEvento[4] = '%';
+	// 	if((bufferTratarEvento[0] == 'E' && bufferTratarEvento[1] == 'N'&& bufferTratarEvento[2] == 'D')||(bufferTratarEvento[0] == 'N' && bufferTratarEvento[1] == 'E'&& bufferTratarEvento[2] == 'W')||
+	// 		(bufferTratarEvento[0] >= '1' && bufferTratarEvento[0] <= '7' && bufferTratarEvento[1] == '-' && bufferTratarEvento[2] >= '1' && bufferTratarEvento[2] <= '7')){
+	// 			linea_serie_drv_enviar_array(bufferTratarEvento);
+
+	// 	}else if((bufferTratarEvento[0] == 'T' && bufferTratarEvento[1] == 'A'&& bufferTratarEvento[2] == 'B')){
+	// 		last_command_tab = 1;
+	// 		conecta_K_visualizar_tablero_juego();
+	// 	}
+	// }else if(ID_evento == BOTON){
+	// 	if (primeraVez == 0){
+	// 		primeraVez = 1;
+	// 	}else{
+	// 		uint64_t tiempo_actual;
+	// 		tiempo_actual = temporizador_drv_leer();
+	// 		intervalo = tiempo_actual - ultimaPulsacion;
+	// 		ultimaPulsacion = tiempo_actual;
+	// 	}
+
+
+	// 	if(auxData == 1){
+	// 		cuenta++;
+	// 	}else{
+	// 		cuenta--;
+	// 	}
+	// 	callback_fifo_encolar(ev_VISUALIZAR_CUENTA, cuenta);
+	// }else if(ID_evento == ev_TX_SERIE){
+	// 	if(last_command_tab == 1){
+	// 		last_command_tab = 0;
+	// 		conecta_K_visualizar_tiempo(auxData-t1);
+	// 	}else if(state = 1){ // se ha escrito el mensaje inicial completamente
+	// 		state ++;
+	// 	}
+	// }
+
 
 void conecta_K_visualizar_tablero_juego()
 {
@@ -133,7 +207,7 @@ void conecta_K_visualizar_tablero_juego()
 		i++;
 	}
 	bufferTablero[136] = '%';
-			linea_serie_drv_enviar_array(bufferTablero);
+	linea_serie_drv_enviar_array(bufferTablero);
 
 	
 }

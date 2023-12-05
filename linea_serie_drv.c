@@ -3,7 +3,7 @@
 #include "linea_serie_drv.h"
 
 const int MAXBUFFER = 3;
-const int MAXBUFFERSALIDA = 300;
+const int MAXBUFFERSALIDA = 800;
 
 static volatile uint8_t bufferEntrada[MAXBUFFER];
 static  int numEscritura = 0;
@@ -69,7 +69,7 @@ void linea_serie_drv_enviar_array(uint8_t cadena[]){
 		
     
     // generar evento que llame a linea_serie_hal
-    linea_serie_hal_escribir(bufferSalida[0]);    
+    linea_serie_drv_escribir(bufferSalida[0]);    
     
 
     
@@ -79,7 +79,7 @@ void linea_serie_drv_continuar_envio(){
 
     if(contadorEscritura < contadorAux){
         //callback_fifo_encolar(evento_id_UART0_CARACTER, bufferSalida[contadorEscritura]);
-			linea_serie_hal_escribir(bufferSalida[contadorEscritura]);
+			linea_serie_drv_escribir(bufferSalida[contadorEscritura]);
         contadorEscritura++;
     }
     else{

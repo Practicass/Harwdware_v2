@@ -16,5 +16,7 @@ void linea_serie_drv_enviar_array(uint8_t cadena[]);
 
 void linea_serie_drv_continuar_envio(void);
 
+void linea_serie_drv_escribir(uint8_t caracter);
+
 #endif
 
