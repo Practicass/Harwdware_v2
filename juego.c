@@ -10,6 +10,10 @@ static uint8_t salida[8][8];
 static TABLERO cuadricula;
 static uint32_t t1;
 static int last_command_tab = 0; // boolean
+static uint32_t tiempo_conecta_k_hay_linea = 0;
+static uint32_t tiempo_humano_piensa_jugada = 0;
+static uint32_t contador_conecta_k_hay_linea = 0;
+static uint32_t contador_humano_piensa_jugada = 0;
 
 enum ESTADOS{ 
 	PAG_PRINCIPAL = 0,
@@ -69,35 +73,13 @@ void juego_inicializar(void (*callback_fifo_encolar_param)()){
 // total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
 // y el total de eventos encolados en la cola de eventos.
 void mostar_pantalla_final_juego(int reason){ // reason = 1 -> cancel, reason = 0 -> end
-	char bufferMsgFin1[53] = "\n\n\n\n****************************\n\tFIN DE LA PARTIDA\n";
+	
 	if (reason == 1){
-		char bufferMsgFin2[21] = "\tPARTIDA CANCELADA\n%";
-		char bufferResultados[74];
-	for (int i = 0; i <53; i++)
-	{
-		bufferResultados[i] = bufferMsgFin1[i];
-		
-	}
-	for (int i = 53; i < 74; i++)
-	{
-		bufferResultados[i] = bufferMsgFin2[i-53];
-	}
-	
-	linea_serie_drv_enviar_array(bufferResultados);
+		char bufferMsgFin[73] = "\n\n\n\n****************************\n\tFIN DE LA PARTIDA\n\tPARTIDA CANCELADA\n%";
+		linea_serie_drv_enviar_array(bufferMsgFin);
 	}else{
-		char bufferMsgFin2[22] = "\tPARTIDA FINALIZADA\n%";
-		char bufferResultados[75];
-	for (int i = 0; i <53; i++)
-	{
-		bufferResultados[i] = bufferMsgFin1[i];
-		
-	}
-	for (int i = 53; i < 75; i++)
-	{
-		bufferResultados[i] = bufferMsgFin2[i-53];
-	}
-	
-	linea_serie_drv_enviar_array(bufferResultados);
+		char bufferMsgFin[74] = "\n\n\n\n****************************\n\tFIN DE LA PARTIDA\n\tPARTIDA FINALIZADA\n%";
+		linea_serie_drv_enviar_array(bufferMsgFin);
 	}
 	
 	
@@ -286,28 +268,34 @@ void tiempo_visualizar_tablero(uint32_t t2){
 	conecta_K_visualizar_tiempo(t3);
 }
 
-void conecta_K_visualizar_tiempo(uint32_t num){
+
+
+void convesor_entero_char(uint32_t num, uint8_t array_digitos[]){
 	int numAux = num;
 	unsigned int longitud = 0;
-	 uint8_t array_digitos[300];
 	while (numAux != 0) {
         numAux /= 10;
         longitud++;
     }
-
     // Crear un array para almacenar los dígitos
-   
     numAux = num;
 	array_digitos[longitud] = '\n';
 	array_digitos[longitud+1] = '%';
-
     // Separar cada dígito y almacenarlo en el array
     for (int i = longitud - 1; i >= 0; i--) {
         array_digitos[i] = (numAux % 10) + '0';
         numAux /= 10;
     }
+	
+}
+
+void conecta_K_visualizar_tiempo(uint32_t num){
+	char array_digitos[300];
+	convesor_entero_char(num,array_digitos);
 	linea_serie_drv_enviar_array(array_digitos);
 }
+
+
 
 
 
