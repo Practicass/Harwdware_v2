@@ -16,11 +16,11 @@ enum ESTADOS{
     ESCRITURA_PAG_PRINCIPAL = 1,
     WAIT_INICIO_PARTIDA = 2,
     //MOSTRAR_TABLERO = 3,
-     ESCRITURA_MOSTRAR_TABLERO = 4,
+    ESCRITURA_MOSTRAR_TABLERO = 4,
     WAIT_COMANDO = 5,
-	MOSTRAR_ERROR = 6,
+	//MOSTRAR_ERROR = 6,
 	ESCRITURA_MOSTAR_ERROR = 7,
-	MOSTRAR_FIN = 8,
+	//MOSTRAR_FIN = 8,
 	ESCRITURA_MOSTRAR_FIN = 9,
 	COMANDO_CORRECTO = 10,
 	ESCRITURA_COMANDO_CORRECTO = 11,
@@ -41,26 +41,67 @@ void juego_inicializar(void (*callback_fifo_encolar_param)()){
 	conecta_K_test_cargar_tablero(&cuadricula); // igual habra que comentarlo, auqne en el enunciado habla algo sobre ello 
 
 
-	char bufferMsgIni[800] = {
-	'*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','\n',
-    '\t', 'C', 'O', 'N', 'E', 'C', 'T', 'A', ' ', 'K', '\n',
-    'P', 'U', 'L', 'S', 'E', ' ', 'U', 'N', ' ', 'B', 'O', 'T', 'O', 'N', ' ', 'P', 'A', 'R', 'A', ' ', 'I', 'N', 'I', 'C', 'I', 'A', 'R', '\n', 
-    'O', ' ', 'E', 'S', 'C', 'R', 'I', 'B', 'A', ' ', 'E', 'L', ' ', 'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '$','N', 'E', 'W','!', '\n',
-    'P', 'A', 'R', 'A', ' ', 'R', 'E', 'A', 'L', 'I', 'Z', 'A', 'R', ' ',
-    'U', 'N', 'A', ' ', 'J', 'U', 'G', 'A', 'D', 'A', ' \n', 'D', 'E', 'B', 'E', ' ',
-    'I', 'N', 'T', 'R', 'O', 'D', 'U', 'C', 'I', 'R', ' ', 'E','L',' ','\n',
-	'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '(', '$', '#', '-', '#', '!', ')','\n',
-	 'P', 'A', 'R', 'A', ' ', 'F', 'I', 'N', 'A', 'L', 'I', 'Z', 'A', 'R', ' ',
-    'L', 'A', ' ', 'P', 'A', 'R', 'T', 'I', 'D', 'A', '\n',
-	'P', 'U', 'L', 'S', 'E', ' ','E', 'L', ' ', 'B', 'O', 'T', 'O', 'N', ' ', '2', ' ', 'O', '\n', 'I', 'N', 'T', 'R', 'O', 'D', 'U', 'Z', 'C', 'A', ' ', 'E', 'L', ' ',
-	 'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '$', 'E', 'N', 'D', '!','\n',
-	'*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','\n','%'
-	};
+	// char bufferMsgIni[800] = {
+	// '*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','\n',
+    // '\t', 'C', 'O', 'N', 'E', 'C', 'T', 'A', ' ', 'K', '\n',
+    // 'P', 'U', 'L', 'S', 'E', ' ', 'U', 'N', ' ', 'B', 'O', 'T', 'O', 'N', ' ', 'P', 'A', 'R', 'A', ' ', 'I', 'N', 'I', 'C', 'I', 'A', 'R', '\n', 
+    // 'O', ' ', 'E', 'S', 'C', 'R', 'I', 'B', 'A', ' ', 'E', 'L', ' ', 'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '$','N', 'E', 'W','!', '\n',
+    // 'P', 'A', 'R', 'A', ' ', 'R', 'E', 'A', 'L', 'I', 'Z', 'A', 'R', ' ',
+    // 'U', 'N', 'A', ' ', 'J', 'U', 'G', 'A', 'D', 'A', ' \n', 'D', 'E', 'B', 'E', ' ',
+    // 'I', 'N', 'T', 'R', 'O', 'D', 'U', 'C', 'I', 'R', ' ', 'E','L',' ','\n',
+	// 'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '(', '$', '#', '-', '#', '!', ')','\n',
+	//  'P', 'A', 'R', 'A', ' ', 'F', 'I', 'N', 'A', 'L', 'I', 'Z', 'A', 'R', ' ',
+    // 'L', 'A', ' ', 'P', 'A', 'R', 'T', 'I', 'D', 'A', '\n',
+	// 'P', 'U', 'L', 'S', 'E', ' ','E', 'L', ' ', 'B', 'O', 'T', 'O', 'N', ' ', '2', ' ', 'O', '\n', 'I', 'N', 'T', 'R', 'O', 'D', 'U', 'Z', 'C', 'A', ' ', 'E', 'L', ' ',
+	//  'C', 'O', 'M', 'A', 'N', 'D', 'O', ' ', '$', 'E', 'N', 'D', '!','\n',
+	// '*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','*','\n','\n','%'
+	// };
+	char bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n%";
 	state = ESCRITURA_PAG_PRINCIPAL;
 	linea_serie_drv_enviar_array(bufferMsgIni);
 
 
 
+}
+
+
+// funcion que muestra la pantalla final en la cual se encuentra la causa, tiempo total de uso del procesador, tiempo
+// total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
+// y el total de eventos encolados en la cola de eventos.
+void mostar_pantalla_final_juego(int reason){ // reason = 1 -> cancel, reason = 0 -> end
+	char bufferMsgFin1[53] = "\n\n\n\n****************************\n\tFIN DE LA PARTIDA\n";
+	if (reason == 1){
+		char bufferMsgFin2[21] = "\tPARTIDA CANCELADA\n%";
+		char bufferResultados[74];
+	for (int i = 0; i <53; i++)
+	{
+		bufferResultados[i] = bufferMsgFin1[i];
+		
+	}
+	for (int i = 53; i < 74; i++)
+	{
+		bufferResultados[i] = bufferMsgFin2[i-53];
+	}
+	
+	linea_serie_drv_enviar_array(bufferResultados);
+	}else{
+		char bufferMsgFin2[22] = "\tPARTIDA FINALIZADA\n%";
+		char bufferResultados[75];
+	for (int i = 0; i <53; i++)
+	{
+		bufferResultados[i] = bufferMsgFin1[i];
+		
+	}
+	for (int i = 53; i < 75; i++)
+	{
+		bufferResultados[i] = bufferMsgFin2[i-53];
+	}
+	
+	linea_serie_drv_enviar_array(bufferResultados);
+	}
+	
+	
+	
 }
 
 void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
@@ -93,7 +134,33 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			conecta_K_visualizar_tablero_juego();
 			state = ESCRITURA_MOSTRAR_TABLERO;
 		}
+	}else if (state == ESCRITURA_MOSTRAR_TABLERO){
+		state = WAIT_COMANDO;
+	}else if (state == WAIT_COMANDO){
+		if (ID_evento == ev_RX_SERIE){ 
+			uint8_t bufferTratarEvento[5];
+			bufferTratarEvento[0] = (auxData >> 16 ) & 0xFF;
+			bufferTratarEvento[1] = (auxData >> 8) & 0xFF;
+			bufferTratarEvento[2] = (auxData) & 0xFF;
+			bufferTratarEvento[3] = '\n';
+			bufferTratarEvento[4] = '%';
+			if((bufferTratarEvento[0] == 'E' && bufferTratarEvento[1] == 'N'&& bufferTratarEvento[2] == 'D')){
+				mostar_pantalla_final_juego(1);
+				state = ESCRITURA_MOSTRAR_FIN;
+			}
+		}else if(ID_evento == BOTON && auxData == 2){
+			
+			uint64_t tiempo_actual;
+			tiempo_actual = temporizador_drv_leer();
+			intervalo = tiempo_actual - ultimaPulsacion;
+			ultimaPulsacion = tiempo_actual;
+			
+			mostar_pantalla_final_juego(1);
+			state = ESCRITURA_MOSTRAR_FIN;
+		}
 	}
+	
+	
 	
 	
 	
