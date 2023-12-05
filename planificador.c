@@ -61,6 +61,8 @@ void planificador(){
 					juego_tratar_evento(idEvento, auxData);
 				}else if(idEvento == BOTON_EINT1_ALARM || idEvento == BOTON_EINT2_ALARM){
 					botones_monitorizar(idEvento);
+				}else if(idEvento == ev_JUEGO){
+					juego_tratar_evento(idEvento, auxData);
 				}
 		}else{
 			power_hal_wait();

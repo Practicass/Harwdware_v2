@@ -4,7 +4,7 @@
 
 #include <inttypes.h> 
 
-#define NUMEVENTOS 18
+#define NUMEVENTOS 19
 
 
 
@@ -28,6 +28,7 @@ enum ID_EVENTO
     ev_RX_SERIE = 15,
     ev_TX_SERIE = 16,
     CONTINUAR_ENVIO = 17,
+    ev_JUEGO = 18
 };
 
 typedef uint8_t EVENTO_T;
