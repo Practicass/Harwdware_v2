@@ -19,7 +19,7 @@ static int contadorEscritura = 1;
 static unsigned int contadorAux = 0; 
 
 
-
+//void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_SERIE_ERROR, int GPIO_SERIE_ERROR_BITS, int GPIO_HAL_PIN_DIR_OUTPUT
 void linea_serie_drv_inicializar(void (*callback_fifo_encolar_param)(), uint8_t id_ev_RX_SERIE, uint8_t id_UART0_CARACTER, uint8_t id_CONTINUAR_ENVIO, uint8_t id_ev_TX_SERIE){
     callback_fifo_encolar = callback_fifo_encolar_param;
 		evento_id_ev_RX_SERIE = id_ev_RX_SERIE;
@@ -35,7 +35,7 @@ void linea_serie_drv_leer(uint8_t caracter){
         almacenar = 1;
         numEscritura = 0;
        // if(gpio_hal_leer(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS) == 1){
-        //    gpio_hal_escribir(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, 0);
+        //gpio_hal_escribir(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, 0);
        // }
         
     }else if(almacenar && numEscritura == 3 && caracter == '!'){ // se recibe el caracter ! y se para de alamacenar

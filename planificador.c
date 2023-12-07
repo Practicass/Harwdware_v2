@@ -23,15 +23,16 @@ void planificador(){
 		botones_init(FIFO_encolar,alarma_activar);
 		juego_inicializar(FIFO_encolar);
 		//
-		WD_hal_inicializar(30);
+		WD_hal_inicializar(1);
 		WD_hal_feed();
-		//alarma_activar(DEEP_SLEEP, USUARIO_AUSENTE, 0);
+		alarma_activar(DEEP_SLEEP, USUARIO_AUSENTE, 0);
 	
     while(idEvento != ALARMA_OVERFLOW){
 			//uint8_t hayEvento = 0; //descomentar comprobar overflow cola
     	uint8_t hayEvento =  FIFO_extraer(&idEvento, &auxData); //comentar para comprobar overflow cola
 			
     	if (hayEvento != 0) {
+				WD_hal_feed();
 				if(idEvento == ALARMA_OVERFLOW){
 					gpio_hal_escribir( GPIO_OVERFLOW, GPIO_OVERFLOW_BITS,  GPIO_HAL_PIN_DIR_OUTPUT);
 				}else if(idEvento == TIMER){
@@ -46,7 +47,7 @@ void planificador(){
 					//idEvento = idEvento;	
 					uint32_t t2 = clock_get_us();
 					juego_tratar_evento(idEvento, t2);
-					WD_hal_feed();
+					alarma_activar(DEEP_SLEEP, USUARIO_AUSENTE, 0);
 				}else if(idEvento == ev_VISUALIZAR_HELLO){
 					visualizarHello(auxData);
 				}else if(idEvento == ev_VISUALIZAR_CUENTA){
@@ -63,6 +64,10 @@ void planificador(){
 					botones_monitorizar(idEvento);
 				}else if(idEvento == ev_JUEGO){
 					juego_tratar_evento(idEvento, auxData);
+				}else if(idEvento == DEEP_SLEEP){
+
+					power_hal_deep_sleep();
+					
 				}
 		}else{
 			power_hal_wait();

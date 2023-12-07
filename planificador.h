@@ -13,7 +13,7 @@
 #include "juego.h"
 
 
-#define USUARIO_AUSENTE 20
+#define USUARIO_AUSENTE 10000
 
 
 void planificador(void);
