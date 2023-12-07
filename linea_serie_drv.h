@@ -8,7 +8,7 @@
 
 
 
-void linea_serie_drv_inicializar(void (*callback_fifo_encolar_param)(), uint8_t idEvento, uint8_t idEvento2, uint8_t idEvento3, uint8_t idEvento4);
+void linea_serie_drv_inicializar(void (*callback_fifo_encolar_param)(), uint8_t idEvento3, uint8_t idEvento4);
 
 void linea_serie_drv_leer(uint8_t caracter);
 

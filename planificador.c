@@ -19,7 +19,7 @@ void planificador(){
 		hello_world_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS, GPIO_HAL_PIN_DIR_OUTPUT,FIFO_encolar, GPIO_HELLO_WORLD_BITS);
 		visualizar_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS);
 		//
-		linea_serie_drv_inicializar(FIFO_encolar, ev_RX_SERIE,UART0_CARACTER,CONTINUAR_ENVIO,ev_TX_SERIE);
+		linea_serie_drv_inicializar(FIFO_encolar, ev_RX_SERIE,ev_TX_SERIE);
 		botones_init(FIFO_encolar,alarma_activar);
 		juego_inicializar(FIFO_encolar);
 		//
@@ -38,13 +38,8 @@ void planificador(){
 				}else if(idEvento == TIMER){
 					alarma_tratar_evento();
 				}else if(idEvento == ev_RX_SERIE){
-					
 					juego_tratar_evento(idEvento,auxData);
-					//linea_serie_drv_enviar_array(bufferSalidaPlan);
-				}else if(idEvento  == CONTINUAR_ENVIO){
-					linea_serie_drv_continuar_envio();
 				}else if(idEvento  == ev_TX_SERIE){
-					//idEvento = idEvento;	
 					uint32_t t2 = clock_get_us();
 					juego_tratar_evento(idEvento, t2);
 					alarma_activar(DEEP_SLEEP, USUARIO_AUSENTE, 0);
@@ -54,8 +49,6 @@ void planificador(){
 					visualizarCuenta(auxData);
 				}else if(idEvento == ev_LATIDO){
 					hello_world_tratar_evento();
-				}else if(idEvento == HELLOWORLD){
-					hello_world_tick_tack();
 				}else if(idEvento == BOTON){
 					botones_pulsar(auxData);
 					alarma_activar(DEEP_SLEEP, USUARIO_AUSENTE, 0);
@@ -65,9 +58,7 @@ void planificador(){
 				}else if(idEvento == ev_JUEGO){
 					juego_tratar_evento(idEvento, auxData);
 				}else if(idEvento == DEEP_SLEEP){
-
 					power_hal_deep_sleep();
-					
 				}
 		}else{
 			power_hal_wait();

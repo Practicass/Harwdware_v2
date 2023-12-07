@@ -2,7 +2,7 @@
 #ifndef TEMPORIZADOR_HAL_H
 #define TEMPORIZADOR_HAL_H
 
-#define TEMPORIZADOR_HAL_TICKS2US  1500
+#define TEMPORIZADOR_HAL_TICKS2US  15
 
 #include <inttypes.h>
 

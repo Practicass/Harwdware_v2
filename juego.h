@@ -6,6 +6,7 @@
 #include "conecta_K_2023.h"
 #include "linea_serie_drv.h"
 #include "alarmas.h"
+#include "fifo.h"
 
 void juego_inicializar(void (*funcion_callbackAlarmasParam)());
 

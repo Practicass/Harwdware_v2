@@ -4,7 +4,7 @@
 
 #include <inttypes.h> 
 
-#define NUMEVENTOS 19
+#define NUMEVENTOS 13
 
 
 
@@ -12,23 +12,17 @@ enum ID_EVENTO
 {
     VOID = 0,
     TIMER = 1,
-    GPIO = 2,
-    HELLOWORLD = 3,
-    ALARMA_OVERFLOW = 4,
-    BOTON = 5,
-    BOTON_EINT1_ALARM = 6,
-    BOTON_EINT2_ALARM = 7,
-	DEEP_SLEEP = 8,
-    ev_VISUALIZAR_CUENTA = 9,
-    ev_LATIDO = 10,
-    ev_VISUALIZAR_HELLO = 11,
-    ev_TEST = 12,
-    TEST_OK = 13,
-    UART0_CARACTER = 14,
-    ev_RX_SERIE = 15,
-    ev_TX_SERIE = 16,
-    CONTINUAR_ENVIO = 17,
-    ev_JUEGO = 18
+    ALARMA_OVERFLOW = 2,
+    BOTON = 3,
+    BOTON_EINT1_ALARM = 4,
+    BOTON_EINT2_ALARM = 5,
+	DEEP_SLEEP = 6,
+    ev_VISUALIZAR_CUENTA = 7,
+    ev_LATIDO = 8,
+    ev_VISUALIZAR_HELLO = 9,
+    ev_RX_SERIE = 10,
+    ev_TX_SERIE = 11,
+    ev_JUEGO = 12,
 };
 
 typedef uint8_t EVENTO_T;
