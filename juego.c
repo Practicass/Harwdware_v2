@@ -27,7 +27,7 @@ static uint32_t t1Humano;
 static uint32_t t2Humano;
 static uint32_t sumHumano = 0;
 static uint32_t numHumano = 0;
-static uint32_t turnoEmpieza = 1;
+static uint32_t turnoEmpieza = 1; //numero del jugador que empieza la siguiente partida
 
 
 
@@ -36,25 +36,22 @@ enum ESTADOS{
 	PAG_PRINCIPAL = 0,
     ESCRITURA_PAG_PRINCIPAL = 1,
     WAIT_INICIO_PARTIDA = 2,
-    //MOSTRAR_TABLERO = 3,
-    ESCRITURA_MOSTRAR_TABLERO = 4,
-    WAIT_COMANDO = 5,
-	//MOSTRAR_ERROR = 6,
-	ESCRITURA_MOSTRAR_ERROR = 7,
-	//MOSTRAR_FIN = 8,
-	ESCRITURA_MOSTRAR_FIN = 9,
-	COMANDO_CORRECTO = 10,
-	ESCRITURA_COMANDO_CORRECTO = 11,
-	WAIT_CANCELAR = 12,
-	CANCELADO = 13,
-	REALIZAR_COMANDO = 14,
-	ESCRITURA_TABLERO_FIN = 15,
-	ESCRITURA_MOSTRAR_CAUSA = 16,
-	ESCRITURA_MOSTRAR_TIEMPO_PROCESADOR = 17,
-	ESCRITURA_MOSTRAR_TIEMPO_HAY_LINEA = 18,
-	ESCRITURA_MOSTRAR_TIEMPO_HUMANO = 19,
-	ESCRITURA_MOSTRAR_ESTADISTICAS_FIFO = 20,
-	ESCRITURA_MOSTRAR_VOLVER_A_JUGAR = 21
+    ESCRITURA_MOSTRAR_TABLERO = 3,
+    WAIT_COMANDO = 4,
+	ESCRITURA_MOSTRAR_ERROR = 5,
+	ESCRITURA_MOSTRAR_FIN = 6,
+	COMANDO_CORRECTO = 7,
+	ESCRITURA_COMANDO_CORRECTO = 8,
+	WAIT_CANCELAR = 9,
+	CANCELADO = 10,
+	REALIZAR_COMANDO = 11,
+	ESCRITURA_TABLERO_FIN = 12,
+	ESCRITURA_MOSTRAR_CAUSA = 13,
+	ESCRITURA_MOSTRAR_TIEMPO_PROCESADOR = 14,
+	ESCRITURA_MOSTRAR_TIEMPO_HAY_LINEA = 15,
+	ESCRITURA_MOSTRAR_TIEMPO_HUMANO = 16,
+	ESCRITURA_MOSTRAR_ESTADISTICAS_FIFO = 17,
+	ESCRITURA_MOSTRAR_VOLVER_A_JUGAR = 18
 	}
 
 static  state = PAG_PRINCIPAL;
@@ -71,20 +68,10 @@ static  state = PAG_PRINCIPAL;
 //---------------------------------FUNCIONES DE VISUALIZACION TABLERO--------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------
 
-// funcion que muestra la pantalla final en la cual se encuentra la causa, tiempo total de uso del procesador, tiempo
-// total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
-// y el total de eventos encolados en la cola de eventos.
-void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
-	
-	if (reason == 1 || reason == 2){
-		char bufferMsgFin[38] = "FIN DE LA PARTIDA\nPARTIDA CANCELADA\n%";
-		linea_serie_drv_enviar_array(bufferMsgFin);
-	}else if( reason == 0){
-		char bufferMsgFin[39] = "FIN DE LA PARTIDA\nPARTIDA FINALIZADA\n%";
-		linea_serie_drv_enviar_array(bufferMsgFin);
-	}
-	
-}
+
+
+
+
 
 //muestra el tablero final y muestra el número del jugador que ha ganado
 void conecta_K_visualizar_tablero_ganador(){
@@ -356,22 +343,46 @@ void conecta_K_visualizar_movimiento_juego(){// se puede llamar a una funcion nu
 //---------------------------------------------------------------------------------------------------------------------
 
 
-void mostrar_causa(){
-	if(reason == 0){
-		uint8_t bufferMsg[32] = "CAUSA: VICTORIA DEL JUGADOR  \n%";
-		bufferMsg[28] = turno +'0';
-		linea_serie_drv_enviar_array(bufferMsg);
-	}else if(reason == 1){
-		uint8_t bufferMsg[25] = "CAUSA: BOTON 2 PULSADO\n%";
-		linea_serie_drv_enviar_array(bufferMsg);
-	}else if(reason == 2) {
-		uint8_t bufferMsg[33] = "CAUSA: COMANDO END INTRODUCIDO\n%";
-		linea_serie_drv_enviar_array(bufferMsg);
+
+
+
+
+
+//Muestra titulo partida fin
+void mostrar_titulo_final_juego(char buffer[]){ //0 -> victoria, 1 -> cancel, 2 -> end
+	
+	if (reason == 1 || reason == 2){
+		char bufferMsgFin[38] = "FIN DE LA PARTIDA\nPARTIDA CANCELADA\n%";
+		int ind = concatenar_array(buffer,bufferMsgFin,0);
+		buffer[ind] = '%';
+	}else if( reason == 0){
+		char bufferMsgFin[39] = "FIN DE LA PARTIDA\nPARTIDA FINALIZADA\n%";
+		int ind = concatenar_array(buffer,bufferMsgFin,0);
+		buffer[ind] = '%';
 	}
 	
 }
 
-void mostrar_tiempo_procesador(){
+
+void mostrar_causa(char buffer[]){
+	if(reason == 0){
+		uint8_t bufferMsg[32] = "CAUSA: VICTORIA DEL JUGADOR  \n%";
+		bufferMsg[28] = turno +'0';
+		int ind = concatenar_array(buffer,bufferMsg,0);
+		buffer[ind] = '%';
+	}else if(reason == 1){
+		uint8_t bufferMsg[25] = "CAUSA: BOTON 2 PULSADO\n%";
+		int ind = concatenar_array(buffer,bufferMsg,0);
+		buffer[ind] = '%';
+	}else if(reason == 2) {
+		uint8_t bufferMsg[33] = "CAUSA: COMANDO END INTRODUCIDO\n%";
+		int ind = concatenar_array(buffer,bufferMsg,0);
+		buffer[ind] = '%';
+	}
+	
+}
+
+void mostrar_tiempo_procesador(char buffer[]){
 	uint8_t bufferMsg[100] = "Tiempo de uso del procesador: ";
 	uint32_t tTotalProcesador = t2Procesador -t1Procesador;
 	int aux = convesor_entero_char_2(tTotalProcesador, bufferMsg, 31);
@@ -380,10 +391,11 @@ void mostrar_tiempo_procesador(){
 	bufferMsg[31+aux+1] = 's';
 	bufferMsg[31+aux+2] = '\n';
 	bufferMsg[31+aux+3] = '%';
-	linea_serie_drv_enviar_array(bufferMsg);
+	int ind = concatenar_array(buffer,bufferMsg,0);
+	buffer[ind] = '%';
 }
 
-void mostrar_tiempo_hay_linea(){
+void mostrar_tiempo_hay_linea(char buffer[]){
 	uint8_t bufferMsg[100] = "Tiempo de computo de conecta_k_hay_linea\nTotal:";
 	int aux = convesor_entero_char_2(sumHayLinea, bufferMsg, 48);
 	bufferMsg[48+aux] = ' ';
@@ -398,19 +410,14 @@ void mostrar_tiempo_hay_linea(){
 	bufferMsg[48+aux+8+aux2] = '\n';
 	bufferMsg[48+aux+8+aux2+1] = '%';
 
-	linea_serie_drv_enviar_array(bufferMsg);
+	int ind = concatenar_array(buffer,bufferMsg,0);
+	buffer[ind] = '%';
+
+
 }
 
 
-//muestra el mensaje de movimiento cancelado por un jugador
-void mostrar_movimiento_cancelado(){
-	uint8_t bufferMsg[22] = "MOVIMIENTO CANCELADO\n%";
-	linea_serie_drv_enviar_array(bufferMsg);
-}
-
-
-
-void mostrar_tiempo_humano(){
+void mostrar_tiempo_humano(char buffer[]){
 	// char bufferMsg[3]="h\n%";
 	// linea_serie_drv_enviar_array(bufferMsg);
 	uint8_t bufferMsg[100] = "Tiempo del humano en pensar\nTotal:";
@@ -427,9 +434,15 @@ void mostrar_tiempo_humano(){
 	bufferMsg[35+aux+8+aux2] = '\n';
 	bufferMsg[35+aux+8+aux2+1] = '%';
 
-	linea_serie_drv_enviar_array(bufferMsg);
+	int ind = concatenar_array(buffer,bufferMsg,0);
+	buffer[ind] = '%';
 }
 
+//muestra el mensaje de movimiento cancelado por un jugador
+void mostrar_movimiento_cancelado(){
+	uint8_t bufferMsg[22] = "MOVIMIENTO CANCELADO\n%";
+	linea_serie_drv_enviar_array(bufferMsg);
+}
 
 //calcula el tiempo que tarda en mostrar el tablero
 void tiempo_visualizar_tablero(uint32_t t2){
@@ -448,7 +461,7 @@ int concatenar_array(char buffer1[], char buffer2[], int index){
 	return index+j;
 }
 //muestra el numero total de eventos encolados y el numero de cada tipo
-void mostrar_estadisticas(){
+void mostrar_estadisticas(char buffer[]){
 	
 	char bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
@@ -469,12 +482,13 @@ void mostrar_estadisticas(){
 	}
 	bufferMsg[index] = '\n';
 	bufferMsg[index+1] = '%';
-	linea_serie_drv_enviar_array(bufferMsg);
+	int ind = concatenar_array(buffer,bufferMsg,0);
+	buffer[ind] = '%';
 }
 
 
 // //muestra el total de eventos encolados y un histograma con los tipos de eventos encolados, el problema es que la escala no permite que se ven aquellos que tiene pocos eventos
-// void mostrar_estadisticas(){
+// void mostrar_estadisticas(char buffer[]){
 	
 // 	char bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
 // 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
@@ -502,7 +516,8 @@ void mostrar_estadisticas(){
 // 	}
 // 	bufferMsg[index] = '\n';
 // 	bufferMsg[index+1] = '%';
-// 	linea_serie_drv_enviar_array(bufferMsg);
+// 	int ind = concatenar_array(buffer,bufferMsg,0);
+// 	buffer[ind] = '%';
 // }
 
 
@@ -579,9 +594,12 @@ void conecta_K_visualizar_tiempo(uint32_t num){
 	linea_serie_drv_enviar_array(array_digitos);
 }
 
-void mostrar_volver_a_jugar(){
+void mostrar_volver_a_jugar(char buffer[]){
 	char bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
-	linea_serie_drv_enviar_array(bufferMsg);
+	int ind = concatenar_array(buffer,bufferMsg,0);
+	buffer[ind] = '%';
+
+	
 }
 
 void mostrar_error_juego(){
@@ -595,6 +613,32 @@ void mostrar_error_juego(){
 
 
 
+// funcion que muestra la pantalla final en la cual se encuentra la causa, tiempo total de uso del procesador, tiempo
+// total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
+// y el total de eventos encolados en la cola de eventos.
+void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
+	char bufferMsgFinal[1000];
+	char bufferMsgAux[300];
+	int index = 0;
+
+	mostrar_titulo_final_juego(bufferMsgAux);
+	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	mostrar_causa(bufferMsgAux);
+	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	mostrar_tiempo_procesador(bufferMsgAux);
+	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	mostrar_tiempo_hay_linea(bufferMsgAux);
+	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	mostrar_tiempo_humano(bufferMsgAux);
+	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	 mostrar_estadisticas(bufferMsgAux);
+	 index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	 mostrar_volver_a_jugar(bufferMsgAux);
+	 index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	bufferMsgFinal[index] = '%';
+	linea_serie_drv_enviar_array(bufferMsgFinal);
+
+}
 
 
 
@@ -629,7 +673,10 @@ void juego_inicializar(void (*callback_fifo_encolar_param)(), void (*callback_gp
 //maquina de estados de nuestro juego
 void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 	if (state == ESCRITURA_PAG_PRINCIPAL){
-		state = WAIT_INICIO_PARTIDA;
+		if(ID_evento == ev_TX_SERIE){
+			state = WAIT_INICIO_PARTIDA;
+		}
+		
 	}else if (state == WAIT_INICIO_PARTIDA ){
 		if (ID_evento == ev_RX_SERIE){ 
 			uint8_t bufferTratarEvento[5];
@@ -639,7 +686,6 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			bufferTratarEvento[3] = '\n';
 			bufferTratarEvento[4] = '%';
 			if((bufferTratarEvento[0] == 'N' && bufferTratarEvento[1] == 'E'&& bufferTratarEvento[2] == 'W')){
-				//linea_serie_drv_enviar_array(bufferTratarEvento); //preguntar si hay que mostrar el comando
 				turno = turnoEmpieza;
 				if(turnoEmpieza == 1){
 					turnoEmpieza = 2;
@@ -663,8 +709,11 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			state = ESCRITURA_MOSTRAR_TABLERO;
 		}
 	}else if (state == ESCRITURA_MOSTRAR_TABLERO){
-		state = WAIT_COMANDO;
-		t1Humano = clock_get_us();
+		if(ID_evento == ev_TX_SERIE){
+			state = WAIT_COMANDO;
+			t1Humano = clock_get_us();
+		}
+
 	}else if (state == WAIT_COMANDO){
 		t2Humano = clock_get_us();
 		numHumano++;
@@ -760,38 +809,9 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 		}
 	}else if ( state == ESCRITURA_MOSTRAR_FIN){
 		if(ID_evento == ev_TX_SERIE){
-			mostrar_causa();
-			state = ESCRITURA_MOSTRAR_CAUSA;
-		}
-	}else if( state == ESCRITURA_MOSTRAR_CAUSA){
-		if(ID_evento == ev_TX_SERIE){
-			mostrar_tiempo_procesador();
-			state = ESCRITURA_MOSTRAR_TIEMPO_PROCESADOR;
-		}
-	}else if(state == ESCRITURA_MOSTRAR_TIEMPO_PROCESADOR){
-		if(ID_evento == ev_TX_SERIE){
-			mostrar_tiempo_hay_linea();
-			state = ESCRITURA_MOSTRAR_TIEMPO_HAY_LINEA;
-		}
-	}else if (state == ESCRITURA_MOSTRAR_TIEMPO_HAY_LINEA){
-		if(ID_evento == ev_TX_SERIE){
-			mostrar_tiempo_humano();
-			state = ESCRITURA_MOSTRAR_TIEMPO_HUMANO;
-		}		
-	}else if (state == ESCRITURA_MOSTRAR_TIEMPO_HUMANO){
-		if(ID_evento == ev_TX_SERIE){
-			mostrar_estadisticas();
-			state = ESCRITURA_MOSTRAR_ESTADISTICAS_FIFO;
-		}	
-	}else if(state == ESCRITURA_MOSTRAR_ESTADISTICAS_FIFO){
-		if(ID_evento == ev_TX_SERIE){
-			mostrar_volver_a_jugar();
-			state = ESCRITURA_MOSTRAR_VOLVER_A_JUGAR;
-		}	
-	}else if(state == ESCRITURA_MOSTRAR_VOLVER_A_JUGAR){
-		if(ID_evento == ev_TX_SERIE){
 			state = WAIT_INICIO_PARTIDA;
-		}	
+		}
 	}
+
 	
 }

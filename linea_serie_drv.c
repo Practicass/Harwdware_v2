@@ -3,7 +3,7 @@
 #include "linea_serie_drv.h"
 
 const int MAXBUFFER = 3;
-const int MAXBUFFERSALIDA = 800;
+const int MAXBUFFERSALIDA = 3000;
 
 static volatile uint8_t bufferEntrada[MAXBUFFER];
 static  int numEscritura = 0;
