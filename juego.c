@@ -449,40 +449,44 @@ void conecta_K_visualizar_tiempo(uint32_t num){
 
 
 //Muestra titulo partida fin
-void mostrar_titulo_final_juego(uint8_t buffer[]){ //0 -> victoria, 1 -> cancel, 2 -> end
-	
+int mostrar_titulo_final_juego(uint8_t buffer[], int index){ //0 -> victoria, 1 -> cancel, 2 -> end
+	int ind;
 	if (reason == 1 || reason == 2){
 		uint8_t bufferMsgFin[38] = "FIN DE LA PARTIDA\nPARTIDA CANCELADA\n%";
-		int ind = concatenar_array(buffer,bufferMsgFin,0);
-		buffer[ind] = '%';
+		ind = concatenar_array(buffer,bufferMsgFin,index);
 	}else if( reason == 0){
 		uint8_t bufferMsgFin[39] = "FIN DE LA PARTIDA\nPARTIDA FINALIZADA\n%";
-		int ind = concatenar_array(buffer,bufferMsgFin,0);
-		buffer[ind] = '%';
+		ind = concatenar_array(buffer,bufferMsgFin,index);
+
 	}
+	return ind;
 	
 }
 
 
-void mostrar_causa(uint8_t buffer[]){
+int mostrar_causa(uint8_t buffer[], int index){
+	int ind;
 	if(reason == 0){
 		uint8_t bufferMsg[32] = "CAUSA: VICTORIA DEL JUGADOR  \n%";
 		bufferMsg[28] = turno +'0';
-		int ind = concatenar_array(buffer,bufferMsg,0);
-		buffer[ind] = '%';
+		ind = concatenar_array(buffer,bufferMsg,index);
+
 	}else if(reason == 1){
 		uint8_t bufferMsg[25] = "CAUSA: BOTON 2 PULSADO\n%";
-		int ind = concatenar_array(buffer,bufferMsg,0);
-		buffer[ind] = '%';
+		ind = concatenar_array(buffer,bufferMsg,index);
+
 	}else if(reason == 2) {
 		uint8_t bufferMsg[33] = "CAUSA: COMANDO END INTRODUCIDO\n%";
-		int ind = concatenar_array(buffer,bufferMsg,0);
-		buffer[ind] = '%';
+		ind = concatenar_array(buffer,bufferMsg,index);
+	
 	}
+
+	return ind;
+
 	
 }
 
-void mostrar_tiempo_procesador(uint8_t buffer[]){
+int mostrar_tiempo_procesador(uint8_t buffer[], int index){
 	uint8_t bufferMsg[100] = "Tiempo de uso del procesador: ";
 	uint32_t tTotalProcesador = t2Procesador -t1Procesador;
 	int aux = convesor_entero_char_2(tTotalProcesador, bufferMsg, 31);
@@ -491,11 +495,11 @@ void mostrar_tiempo_procesador(uint8_t buffer[]){
 	bufferMsg[31+aux+1] = 's';
 	bufferMsg[31+aux+2] = '\n';
 	bufferMsg[31+aux+3] = '%';
-	int ind = concatenar_array(buffer,bufferMsg,0);
-	buffer[ind] = '%';
+	int ind = concatenar_array(buffer,bufferMsg,index);
+	return ind;
 }
 
-void mostrar_tiempo_hay_linea(uint8_t buffer[]){
+int mostrar_tiempo_hay_linea(uint8_t buffer[], int index){
 	uint8_t bufferMsg[100] = "Tiempo de computo de conecta_k_hay_linea\nTotal:";
 	int aux = convesor_entero_char_2(sumHayLinea, bufferMsg, 48);
 	bufferMsg[48+aux] = ' ';
@@ -510,14 +514,13 @@ void mostrar_tiempo_hay_linea(uint8_t buffer[]){
 	bufferMsg[48+aux+8+aux2] = '\n';
 	bufferMsg[48+aux+8+aux2+1] = '%';
 
-	int ind = concatenar_array(buffer,bufferMsg,0);
-	buffer[ind] = '%';
-
+	int ind = concatenar_array(buffer,bufferMsg,index);
+	return ind;
 
 }
 
 
-void mostrar_tiempo_humano(uint8_t buffer[]){
+int mostrar_tiempo_humano(uint8_t buffer[], int index){
 	// char bufferMsg[3]="h\n%";
 	// linea_serie_drv_enviar_array(bufferMsg);
 	uint8_t bufferMsg[100] = "Tiempo del humano en pensar\nTotal:";
@@ -534,35 +537,35 @@ void mostrar_tiempo_humano(uint8_t buffer[]){
 	bufferMsg[35+aux+8+aux2] = '\n';
 	bufferMsg[35+aux+8+aux2+1] = '%';
 
-	int ind = concatenar_array(buffer,bufferMsg,0);
-	buffer[ind] = '%';
+	int ind = concatenar_array(buffer,bufferMsg,index);
+	return ind;
 }
 
 
 //muestra el numero total de eventos encolados y el numero de cada tipo
-void mostrar_estadisticas(uint8_t buffer[]){
+int mostrar_estadisticas(uint8_t buffer[], int index2){
 	
 	uint8_t bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
-	uint8_t bufferMsg[300];
+	//uint8_t bufferMsg[300];
 	int index = 0;
 	uint8_t bufferEstadistica[100];
 	
 	uint32_t total_eventos = FIFO_estadisticas(VOID);
-	index = concatenar_array(bufferMsg, bufferMensajes[0], index);
+	index = concatenar_array(buffer, bufferMensajes[0], index2);
 	convesor_entero_char_3((FIFO_estadisticas(0)), bufferEstadistica, 0); //revisar cuando el valor es 0
-	index = concatenar_array(bufferMsg, bufferEstadistica, index);
+	index = concatenar_array(buffer, bufferEstadistica, index);
 		
 	for(int i=1; i<NUMEVENTOS; i++){
-		index = concatenar_array(bufferMsg, bufferMensajes[i], index);
+		index = concatenar_array(buffer, bufferMensajes[i], index);
 		convesor_entero_char_3((FIFO_estadisticas(i)), bufferEstadistica, 0); //revisar cuando el valor es 0
-		index = concatenar_array(bufferMsg, bufferEstadistica, index);
+		index = concatenar_array(buffer, bufferEstadistica, index);
 		
 	}
-	bufferMsg[index] = '\n';
-	bufferMsg[index+1] = '%';
-	int ind = concatenar_array(buffer,bufferMsg,0);
-	buffer[ind] = '%';
+	buffer[index] = '\n';
+	//bufferMsg[index+1] = '%';
+	//int ind = concatenar_array(buffer,bufferMsg,0);
+	return index+1;
 }
 
 
@@ -601,10 +604,11 @@ void mostrar_estadisticas(uint8_t buffer[]){
 
 
 
-void mostrar_volver_a_jugar(uint8_t buffer[]){
+int mostrar_volver_a_jugar(uint8_t buffer[], int index){
 	uint8_t bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
-	int ind = concatenar_array(buffer,bufferMsg,0);
+	int ind = concatenar_array(buffer,bufferMsg,index);
 	buffer[ind] = '%';
+	return ind+1;
 
 	
 }
@@ -622,34 +626,61 @@ void mostrar_error_juego(){
 	linea_serie_drv_enviar_array(bufferMsg);
 }
 
+// // funcion que muestra la pantalla final en la cual se encuentra la causa, tiempo total de uso del procesador, tiempo
+// // total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
+// // y el total de eventos encolados en la cola de eventos.
+// void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
+// 	uint8_t bufferMsgFinal[600];
+// 	uint8_t bufferMsgAux[300];
+// 	int index = 0;
+
+// 	mostrar_titulo_final_juego(bufferMsgAux);
+// 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+// 	mostrar_causa(bufferMsgAux);
+// 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+// 	mostrar_tiempo_procesador(bufferMsgAux);
+// 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+// 	mostrar_tiempo_hay_linea(bufferMsgAux);
+// 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+// 	mostrar_tiempo_humano(bufferMsgAux);
+// 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+// 	mostrar_estadisticas(bufferMsgAux);
+// 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+// 	mostrar_volver_a_jugar(bufferMsgAux);
+// 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+// 	bufferMsgFinal[index] = '%';
+// 	linea_serie_drv_enviar_array(bufferMsgFinal);
+
+// }
+
 // funcion que muestra la pantalla final en la cual se encuentra la causa, tiempo total de uso del procesador, tiempo
 // total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
 // y el total de eventos encolados en la cola de eventos.
 void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
-	uint8_t bufferMsgFinal[500];
+	uint8_t bufferMsgFinal[600];
 	uint8_t bufferMsgAux[300];
 	int index = 0;
 
-	// mostrar_titulo_final_juego(bufferMsgAux);
-	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	// mostrar_causa(bufferMsgAux);
-	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	// mostrar_tiempo_procesador(bufferMsgAux);
-	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	// mostrar_tiempo_hay_linea(bufferMsgAux);
-	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	// mostrar_tiempo_humano(bufferMsgAux);
-	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	mostrar_estadisticas(bufferMsgAux);
-	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	// mostrar_volver_a_jugar(bufferMsgAux);
-	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	index = mostrar_titulo_final_juego(bufferMsgFinal, 0);
+	index = mostrar_causa(bufferMsgFinal, index);
+	index = mostrar_tiempo_procesador(bufferMsgFinal, index);
+	index = mostrar_tiempo_hay_linea(bufferMsgFinal, index);
+	index = mostrar_tiempo_humano(bufferMsgFinal, index);
+	index = mostrar_estadisticas(bufferMsgFinal, index);
+	index = mostrar_volver_a_jugar(bufferMsgFinal, index);
 	bufferMsgFinal[index] = '%';
 	linea_serie_drv_enviar_array(bufferMsgFinal);
 
 }
 
-
+void limpiar_salida(){
+	for(int i=0; i<7; i++){
+			for(int j=0; j<7; j++){
+				salida[i][j] = 0;
+			}
+		}
+	
+}
 
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -667,7 +698,6 @@ void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callbac
 	GPIO_JUGAR_ERROR_BITS = GPIO_JUGAR_ERROR_BITS_PARAM;
 	callback_gpio_hal_sentido_param(GPIO_JUGAR_ERROR_PARAM, GPIO_JUGAR_ERROR_BITS_PARAM, GPIO_HAL_PIN_DIR_OUTPUT);
 	tablero_inicializar(&cuadricula);
-	conecta_K_test_cargar_tablero(&cuadricula); // igual habra que comentarlo, auqne en el enunciado habla algo sobre ello 
 	uint8_t bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n%";
 	state = ESCRITURA_PAG_PRINCIPAL;
 	linea_serie_drv_enviar_array(bufferMsgIni);
@@ -701,6 +731,9 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 					turnoEmpieza = 1;
 				}
 				t1Procesador = clock_get_us();
+				limpiar_tablero(&cuadricula);
+				limpiar_salida();
+				conecta_K_test_cargar_tablero(&cuadricula);
 				conecta_K_visualizar_tablero_juego();
 				state = ESCRITURA_MOSTRAR_TABLERO;
 			}
@@ -713,6 +746,9 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 				intervalo = tiempo_actual - ultimaPulsacion;
 				ultimaPulsacion = tiempo_actual;
 			}
+			limpiar_tablero(&cuadricula);
+			limpiar_salida();
+			conecta_K_test_cargar_tablero(&cuadricula);
 			conecta_K_visualizar_tablero_juego();
 			state = ESCRITURA_MOSTRAR_TABLERO;
 		}

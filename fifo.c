@@ -13,7 +13,7 @@ struct fifo{
 
 };
 
-int GPIO_OVERFLOW_BITS; 
+static int GPIO_OVERFLOW_BITS; 
 
 
 

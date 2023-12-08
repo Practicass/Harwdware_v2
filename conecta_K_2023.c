@@ -186,6 +186,22 @@ void conecta_K_test_cargar_tablero(TABLERO *t)
 
 }
 
+
+void conecta_K_limpiar_tablero(TABLERO *t)
+{
+	#include "tablero_test.h"	
+
+	//for... for... tablero_insertar_color...	
+	for(int i=0; i<7; i++){
+		int n=0;
+		for(int j=0; j<7; j++){
+			tablero_insertar_color(t,i,j,0);
+			n++;
+		}
+	}
+
+}
+
 // funcion que visualiza en "pantalla" el contenido de las 7 primeras filas y columnas 
 // de las m*n del tablero en juego (suponemos que m y n son >= 7 siempre)
 // en memoria se deberia ver algo tal que asi:
@@ -282,7 +298,7 @@ void conecta_K_jugar(void){
 // Pone todas las casillas del tablero t a 0, es decir quita todas las fichas del tablero
 void limpiar_tablero(TABLERO *t){
 		for(int i=0; i<7; i++){
-		for(int j=0; j<7; j++){
+			for(int j=0; j<7; j++){
 				tablero_borrar_celda(t,i,j);
 			}
 		}

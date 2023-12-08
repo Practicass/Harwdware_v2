@@ -35,6 +35,7 @@ void conecta_K_visualizar_tablero(TABLERO *t, uint8_t pantalla[8][8]);
 
 void conecta_K_test_cargar_tablero(TABLERO *t);
 
+void limpiar_tablero(TABLERO *t);
 #if 0
 // funciones a implementar en ARM
 
