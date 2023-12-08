@@ -37,6 +37,7 @@ void alarma_inicializar(void (*callback_fifo_encolar_param)()){
         indexAlarms[i] = -1; //-1 indica que no existe alamra de ese evento
 				i++;
     }
+        
 		temporizador_drv_reloj(1, callback_fifo_encolar_param, TIMER);
         callback_fifo_encolar = callback_fifo_encolar_param;
     
@@ -65,7 +66,7 @@ auxData){
         alarmas[id].auxdata = 0;
 
     }else{
-        //comprobar si alarma periódica, bit de más peso retardo
+        //comprobar si alarma periï¿½dica, bit de mï¿½s peso retardo
         periodico = retardo & 0x80000000;
         retardoAux = retardo & 0x7fffffff;
         //comprobacion de la existencia de una alarma para ID_evento

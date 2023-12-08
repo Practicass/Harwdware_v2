@@ -6,6 +6,9 @@ static volatile int intervalo;
 static volatile int ultimaPulsacion = 0;
 static volatile int primeraVez = 0;
 static void (*callback_fifo_encolar)();
+static int GPIO_JUGAR_ERROR;
+static int GPIO_JUGAR_ERROR_BITS;
+static void (*callback_gpio_hal_escribir)();
 static uint8_t salida[8][8];
 static TABLERO cuadricula;
 static uint32_t t1;
@@ -24,6 +27,7 @@ static uint32_t t1Humano;
 static uint32_t t2Humano;
 static uint32_t sumHumano = 0;
 static uint32_t numHumano = 0;
+static uint32_t turnoEmpieza = 1;
 
 
 
@@ -49,7 +53,8 @@ enum ESTADOS{
 	ESCRITURA_MOSTRAR_TIEMPO_PROCESADOR = 17,
 	ESCRITURA_MOSTRAR_TIEMPO_HAY_LINEA = 18,
 	ESCRITURA_MOSTRAR_TIEMPO_HUMANO = 19,
-	ESCRITURA_MOSTRAR_ESTADISTICAS_FIFO = 20
+	ESCRITURA_MOSTRAR_ESTADISTICAS_FIFO = 20,
+	ESCRITURA_MOSTRAR_VOLVER_A_JUGAR = 21
 	}
 
 static  state = PAG_PRINCIPAL;
@@ -442,24 +447,64 @@ int concatenar_array(char buffer1[], char buffer2[], int index){
 	}
 	return index+j;
 }
-
+//muestra el numero total de eventos encolados y el numero de cada tipo
 void mostrar_estadisticas(){
 	
-	char bufferMensajes[NUMEVENTOS][25] = {"VOID: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_VISUALIZAR_CUENTA: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
+	char bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
 	char bufferMsg[300];
 	int index = 0;
 	char bufferEstadistica[100];
 	int longitud = 0;
-	for(int i=0; i<NUMEVENTOS; i++){
+	uint32_t total_eventos = FIFO_estadisticas(VOID);
+	index = concatenar_array(bufferMsg, bufferMensajes[0], index);
+	longitud = convesor_entero_char_3((FIFO_estadisticas(0)), bufferEstadistica, 0); //revisar cuando el valor es 0
+	index = concatenar_array(bufferMsg, bufferEstadistica, index);
+		
+	for(int i=1; i<NUMEVENTOS; i++){
 		index = concatenar_array(bufferMsg, bufferMensajes[i], index);
-		longitud = convesor_entero_char_3(FIFO_estadisticas(i), bufferEstadistica, 0);
+		longitud = convesor_entero_char_3((FIFO_estadisticas(i)), bufferEstadistica, 0); //revisar cuando el valor es 0
 		index = concatenar_array(bufferMsg, bufferEstadistica, index);
 		
 	}
-	bufferMsg[index] = '%';
+	bufferMsg[index] = '\n';
+	bufferMsg[index+1] = '%';
 	linea_serie_drv_enviar_array(bufferMsg);
 }
+
+
+// //muestra el total de eventos encolados y un histograma con los tipos de eventos encolados, el problema es que la escala no permite que se ven aquellos que tiene pocos eventos
+// void mostrar_estadisticas(){
+	
+// 	char bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
+// 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
+// 	char bufferMsg[300];
+// 	int index = 0;
+// 	char bufferEstadistica[100];
+// 	int longitud = 0;
+// 	uint32_t total_eventos = FIFO_estadisticas(VOID);
+// 	index = concatenar_array(bufferMsg, bufferMensajes[0], index);
+// 	longitud = convesor_entero_char_3(FIFO_estadisticas(0), bufferEstadistica, 0); //revisar cuando el valor es 0
+//  	index = concatenar_array(bufferMsg, bufferEstadistica, index);
+	
+// 	for(int i=1; i<NUMEVENTOS; i++){
+// 		index = concatenar_array(bufferMsg, bufferMensajes[i], index);
+// 		int max = (FIFO_estadisticas(i)*50/total_eventos);
+// 		int j = 0;
+// 		while (j<max){
+// 			bufferEstadistica[j]='*';
+// 			j++;
+// 		}
+// 		bufferEstadistica[j] = '%';
+		
+// 		index = concatenar_array(bufferMsg, bufferEstadistica, index);
+		
+// 	}
+// 	bufferMsg[index] = '\n';
+// 	bufferMsg[index+1] = '%';
+// 	linea_serie_drv_enviar_array(bufferMsg);
+// }
+
 
 
 //funcion que dado un entero lo convierte en char para permitir su escritura por linea serie
@@ -506,10 +551,15 @@ int convesor_entero_char_2(uint32_t num, uint8_t array_digitos[], int indice){
 int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
 	int numAux = num;
 	unsigned int longitud = 0;
-	while (numAux != 0) {
-        numAux /= 10;
-        longitud++;
-    }
+	if(num == 0){
+		longitud = 1;
+	}else{
+		while (numAux != 0) {
+        	numAux /= 10;
+        	longitud++;
+    	}
+	}
+
     // Crear un array para almacenar los dígitos
     numAux = num;
 
@@ -527,6 +577,16 @@ void conecta_K_visualizar_tiempo(uint32_t num){
 	char array_digitos[300];
 	convesor_entero_char(num,array_digitos);
 	linea_serie_drv_enviar_array(array_digitos);
+}
+
+void mostrar_volver_a_jugar(){
+	char bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
+	linea_serie_drv_enviar_array(bufferMsg);
+}
+
+void mostrar_error_juego(){
+	char bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
+	linea_serie_drv_enviar_array(bufferMsg);
 }
 
 
@@ -547,11 +607,13 @@ void conecta_K_visualizar_tiempo(uint32_t num){
 
 
 //comienzo del juego, inicializa el tablero y muestra mensaje inicial por pantalla
-void juego_inicializar(void (*callback_fifo_encolar_param)()){
+void juego_inicializar(void (*callback_fifo_encolar_param)(), void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM){
 	cuenta = 0;
 	intervalo = 0;
 	callback_fifo_encolar = callback_fifo_encolar_param;
-
+	GPIO_JUGAR_ERROR = GPIO_JUGAR_ERROR_PARAM;
+	GPIO_JUGAR_ERROR_BITS = GPIO_JUGAR_ERROR_BITS_PARAM;
+	callback_gpio_hal_sentido_param(GPIO_JUGAR_ERROR_PARAM, GPIO_JUGAR_ERROR_BITS_PARAM, GPIO_HAL_PIN_DIR_OUTPUT);
 	tablero_inicializar(&cuadricula);
 	conecta_K_test_cargar_tablero(&cuadricula); // igual habra que comentarlo, auqne en el enunciado habla algo sobre ello 
 	char bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n%";
@@ -578,6 +640,12 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			bufferTratarEvento[4] = '%';
 			if((bufferTratarEvento[0] == 'N' && bufferTratarEvento[1] == 'E'&& bufferTratarEvento[2] == 'W')){
 				//linea_serie_drv_enviar_array(bufferTratarEvento); //preguntar si hay que mostrar el comando
+				turno = turnoEmpieza;
+				if(turnoEmpieza == 1){
+					turnoEmpieza = 2;
+				}else{
+					turnoEmpieza = 1;
+				}
 				t1Procesador = clock_get_us();
 				conecta_K_visualizar_tablero_juego();
 				state = ESCRITURA_MOSTRAR_TABLERO;
@@ -609,6 +677,7 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			bufferTratarEvento[3] = '\n';
 			bufferTratarEvento[4] = '%';
 			if((bufferTratarEvento[0] == 'E' && bufferTratarEvento[1] == 'N'&& bufferTratarEvento[2] == 'D')){
+				//callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0);
 				reason = 2;
 				t2Procesador = clock_get_us();
 				mostrar_pantalla_final_juego();
@@ -618,16 +687,23 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 				fila = bufferTratarEvento[0] - '0';
 				columna = bufferTratarEvento[2] - '0';
 				if (celda_vacia(tablero_leer_celda(&cuadricula, fila -1, columna -1))){
+					//callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0);
 					conecta_K_visualizar_movimiento_juego();
 					state = ESCRITURA_COMANDO_CORRECTO;
 					alarma_activar(ev_JUEGO, 3000, 0);
 				}else{
 					//visualizar error
+					callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 1);
+					mostrar_error_juego();
 					state = ESCRITURA_MOSTRAR_ERROR;
 				}
+			}else{
+				callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 1);
+				mostrar_error_juego();
+				state = ESCRITURA_MOSTRAR_ERROR;
 			}
 		}else if(ID_evento == BOTON && auxData == 2){
-			
+			callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0);
 			uint64_t tiempo_actual;
 			tiempo_actual = temporizador_drv_leer();
 			intervalo = tiempo_actual - ultimaPulsacion;
@@ -706,6 +782,15 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 		if(ID_evento == ev_TX_SERIE){
 			mostrar_estadisticas();
 			state = ESCRITURA_MOSTRAR_ESTADISTICAS_FIFO;
+		}	
+	}else if(state == ESCRITURA_MOSTRAR_ESTADISTICAS_FIFO){
+		if(ID_evento == ev_TX_SERIE){
+			mostrar_volver_a_jugar();
+			state = ESCRITURA_MOSTRAR_VOLVER_A_JUGAR;
+		}	
+	}else if(state == ESCRITURA_MOSTRAR_VOLVER_A_JUGAR){
+		if(ID_evento == ev_TX_SERIE){
+			state = WAIT_INICIO_PARTIDA;
 		}	
 	}
 	

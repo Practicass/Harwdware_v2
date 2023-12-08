@@ -19,7 +19,7 @@ int GPIO_OVERFLOW_BITS;
 
 // index_begin = 29 e index_end 3, adelantdo = true -> se encolan 3 index_begin = 0 index_end 3, adelantado = 0
 struct fifo cola;
-//Inicialización de la cola. Se le pasa como parámetro el pin del GPIO utilizado para marcar errores.
+//Inicializaciï¿½n de la cola. Se le pasa como parï¿½metro el pin del GPIO utilizado para marcar errores.
 void FIFO_inicializar(GPIO_HAL_PIN_T pin_overflow, int GPIO_OVERFLOW_BITS_PARAM){
 		int i = 0;
 		GPIO_OVERFLOW_BITS = GPIO_OVERFLOW_BITS_PARAM;
@@ -44,8 +44,8 @@ void FIFO_inicializar(GPIO_HAL_PIN_T pin_overflow, int GPIO_OVERFLOW_BITS_PARAM)
 
 }
 
-//Esta función guardará en la cola el evento. El campo ID_evento, que permita identificar el evento (p.e. qué interrupción ha saltado) 
-//y el campo auxData en caso de que el evento necesite pasar información extra.
+//Esta funciï¿½n guardarï¿½ en la cola el evento. El campo ID_evento, que permita identificar el evento (p.e. quï¿½ interrupciï¿½n ha saltado) 
+//y el campo auxData en caso de que el evento necesite pasar informaciï¿½n extra.
 void FIFO_encolar(EVENTO_T ID_evento, uint32_t auxData){
     uint32_t irq;
     irq = read_IRQ_bit();
@@ -72,8 +72,8 @@ void FIFO_encolar(EVENTO_T ID_evento, uint32_t auxData){
   
 }
 
-//Si hay eventos sin procesar, devuelve un valor distinto de cero y el evento más antiguo sin procesar por referencia. Cero indicará 
-//que la cola está vacía y no se ha devuelto ningún evento.
+//Si hay eventos sin procesar, devuelve un valor distinto de cero y el evento mï¿½s antiguo sin procesar por referencia. Cero indicarï¿½ 
+//que la cola estï¿½ vacï¿½a y no se ha devuelto ningï¿½n evento.
 uint8_t FIFO_extraer(EVENTO_T *ID_evento, uint32_t* auxData){
 		uint32_t irq;
 		irq = read_IRQ_bit();
@@ -103,7 +103,7 @@ uint8_t FIFO_extraer(EVENTO_T *ID_evento, uint32_t* auxData){
     }
 }
 
-//Dado un identificador de evento nos devuelve el número total de veces que ese evento se ha encolado. El evento VOID nos devolverá 
+//Dado un identificador de evento nos devuelve el nï¿½mero total de veces que ese evento se ha encolado. El evento VOID nos devolverï¿½ 
 //el total de eventos encolados desde el inicio.
 uint32_t FIFO_estadisticas(EVENTO_T ID_evento){
     
@@ -111,7 +111,7 @@ uint32_t FIFO_estadisticas(EVENTO_T ID_evento){
    {
     uint32_t cont = 0;
     int i = 0;
-    while (i <= NUMEVENTOS){
+    while (i < NUMEVENTOS){
         cont = cont + cola.contador[i];
         i++;
     }

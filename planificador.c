@@ -19,9 +19,9 @@ void planificador(){
 		hello_world_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS, GPIO_HAL_PIN_DIR_OUTPUT,FIFO_encolar, GPIO_HELLO_WORLD_BITS);
 		visualizar_inicializar(GPIO_HELLO_WORLD, GPIO_HELLO_WORLD_BITS);
 		//
-		linea_serie_drv_inicializar(FIFO_encolar, ev_RX_SERIE,ev_TX_SERIE);
+		linea_serie_drv_inicializar(FIFO_encolar, ev_RX_SERIE,ev_TX_SERIE, gpio_hal_sentido, gpio_hal_escribir, GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, GPIO_HAL_PIN_DIR_OUTPUT);
 		botones_init(FIFO_encolar,alarma_activar);
-		juego_inicializar(FIFO_encolar);
+		juego_inicializar(FIFO_encolar, gpio_hal_sentido, gpio_hal_escribir, GPIO_JUEGO_ERROR, GPIO_JUEGO_ERROR_BITS, GPIO_HAL_PIN_DIR_OUTPUT);
 		//
 		WD_hal_inicializar(1);
 		WD_hal_feed();
@@ -45,8 +45,6 @@ void planificador(){
 					alarma_activar(DEEP_SLEEP, USUARIO_AUSENTE, 0);
 				}else if(idEvento == ev_VISUALIZAR_HELLO){
 					visualizarHello(auxData);
-				}else if(idEvento == ev_VISUALIZAR_CUENTA){
-					visualizarCuenta(auxData);
 				}else if(idEvento == ev_LATIDO){
 					hello_world_tratar_evento();
 				}else if(idEvento == BOTON){

@@ -3,6 +3,7 @@
 
 
 #include "temporizador_drv.h"
+#include "gpio_hal.h"
 
 
 
