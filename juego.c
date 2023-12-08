@@ -5,14 +5,12 @@ static volatile int cuenta;
 static volatile int intervalo;
 static volatile int ultimaPulsacion = 0;
 static volatile int primeraVez = 0;
-static void (*callback_fifo_encolar)();
 static int GPIO_JUGAR_ERROR;
 static int GPIO_JUGAR_ERROR_BITS;
 static void (*callback_gpio_hal_escribir)();
 static uint8_t salida[8][8];
 static TABLERO cuadricula;
 static uint32_t t1;
-static int last_command_tab = 0; // boolean
 static uint8_t turno = 1;
 static uint8_t fila = 0;
 static uint8_t columna = 0;
@@ -352,7 +350,7 @@ void tiempo_visualizar_tablero(uint32_t t2){
 	conecta_K_visualizar_tiempo(t3);
 }
 
-int concatenar_array(char buffer1[], char buffer2[], int index){
+int concatenar_array(uint8_t buffer1[], uint8_t buffer2[], int index){
 	int j=0;
 	while(buffer2[j] != '%'){
 		buffer1[index+j] = buffer2[j];
@@ -431,7 +429,7 @@ int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
 
 //muestra el tiempo que tarda en mostrar el tablero, el cual ha sido previamente calculado
 void conecta_K_visualizar_tiempo(uint32_t num){
-	char array_digitos[300];
+	uint8_t array_digitos[300];
 	convesor_entero_char(num,array_digitos);
 	linea_serie_drv_enviar_array(array_digitos);
 }
@@ -451,14 +449,14 @@ void conecta_K_visualizar_tiempo(uint32_t num){
 
 
 //Muestra titulo partida fin
-void mostrar_titulo_final_juego(char buffer[]){ //0 -> victoria, 1 -> cancel, 2 -> end
+void mostrar_titulo_final_juego(uint8_t buffer[]){ //0 -> victoria, 1 -> cancel, 2 -> end
 	
 	if (reason == 1 || reason == 2){
-		char bufferMsgFin[38] = "FIN DE LA PARTIDA\nPARTIDA CANCELADA\n%";
+		uint8_t bufferMsgFin[38] = "FIN DE LA PARTIDA\nPARTIDA CANCELADA\n%";
 		int ind = concatenar_array(buffer,bufferMsgFin,0);
 		buffer[ind] = '%';
 	}else if( reason == 0){
-		char bufferMsgFin[39] = "FIN DE LA PARTIDA\nPARTIDA FINALIZADA\n%";
+		uint8_t bufferMsgFin[39] = "FIN DE LA PARTIDA\nPARTIDA FINALIZADA\n%";
 		int ind = concatenar_array(buffer,bufferMsgFin,0);
 		buffer[ind] = '%';
 	}
@@ -466,7 +464,7 @@ void mostrar_titulo_final_juego(char buffer[]){ //0 -> victoria, 1 -> cancel, 2 
 }
 
 
-void mostrar_causa(char buffer[]){
+void mostrar_causa(uint8_t buffer[]){
 	if(reason == 0){
 		uint8_t bufferMsg[32] = "CAUSA: VICTORIA DEL JUGADOR  \n%";
 		bufferMsg[28] = turno +'0';
@@ -484,7 +482,7 @@ void mostrar_causa(char buffer[]){
 	
 }
 
-void mostrar_tiempo_procesador(char buffer[]){
+void mostrar_tiempo_procesador(uint8_t buffer[]){
 	uint8_t bufferMsg[100] = "Tiempo de uso del procesador: ";
 	uint32_t tTotalProcesador = t2Procesador -t1Procesador;
 	int aux = convesor_entero_char_2(tTotalProcesador, bufferMsg, 31);
@@ -497,7 +495,7 @@ void mostrar_tiempo_procesador(char buffer[]){
 	buffer[ind] = '%';
 }
 
-void mostrar_tiempo_hay_linea(char buffer[]){
+void mostrar_tiempo_hay_linea(uint8_t buffer[]){
 	uint8_t bufferMsg[100] = "Tiempo de computo de conecta_k_hay_linea\nTotal:";
 	int aux = convesor_entero_char_2(sumHayLinea, bufferMsg, 48);
 	bufferMsg[48+aux] = ' ';
@@ -519,7 +517,7 @@ void mostrar_tiempo_hay_linea(char buffer[]){
 }
 
 
-void mostrar_tiempo_humano(char buffer[]){
+void mostrar_tiempo_humano(uint8_t buffer[]){
 	// char bufferMsg[3]="h\n%";
 	// linea_serie_drv_enviar_array(bufferMsg);
 	uint8_t bufferMsg[100] = "Tiempo del humano en pensar\nTotal:";
@@ -542,13 +540,13 @@ void mostrar_tiempo_humano(char buffer[]){
 
 
 //muestra el numero total de eventos encolados y el numero de cada tipo
-void mostrar_estadisticas(char buffer[]){
+void mostrar_estadisticas(uint8_t buffer[]){
 	
-	char bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
+	uint8_t bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
-	char bufferMsg[300];
+	uint8_t bufferMsg[300];
 	int index = 0;
-	char bufferEstadistica[100];
+	uint8_t bufferEstadistica[100];
 	
 	uint32_t total_eventos = FIFO_estadisticas(VOID);
 	index = concatenar_array(bufferMsg, bufferMensajes[0], index);
@@ -569,13 +567,13 @@ void mostrar_estadisticas(char buffer[]){
 
 
 // //muestra el total de eventos encolados y un histograma con los tipos de eventos encolados, el problema es que la escala no permite que se ven aquellos que tiene pocos eventos
-// void mostrar_estadisticas(char buffer[]){
+// void mostrar_estadisticas(uint8_t buffer[]){
 	
-// 	char bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
+// 	uint8_t bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
 // 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
-// 	char bufferMsg[300];
+// 	uint8_t bufferMsg[300];
 // 	int index = 0;
-// 	char bufferEstadistica[100];
+// 	uint8_t bufferEstadistica[100];
 // 	int longitud = 0;
 // 	uint32_t total_eventos = FIFO_estadisticas(VOID);
 // 	index = concatenar_array(bufferMsg, bufferMensajes[0], index);
@@ -603,8 +601,8 @@ void mostrar_estadisticas(char buffer[]){
 
 
 
-void mostrar_volver_a_jugar(char buffer[]){
-	char bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
+void mostrar_volver_a_jugar(uint8_t buffer[]){
+	uint8_t bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
 	int ind = concatenar_array(buffer,bufferMsg,0);
 	buffer[ind] = '%';
 
@@ -620,7 +618,7 @@ void mostrar_movimiento_cancelado(){
 
 
 void mostrar_error_juego(){
-	char bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
+	uint8_t bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
 	linea_serie_drv_enviar_array(bufferMsg);
 }
 
@@ -628,22 +626,22 @@ void mostrar_error_juego(){
 // total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
 // y el total de eventos encolados en la cola de eventos.
 void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
-	char bufferMsgFinal[1000];
-	char bufferMsgAux[300];
+	uint8_t bufferMsgFinal[500];
+	uint8_t bufferMsgAux[300];
 	int index = 0;
 
-	mostrar_titulo_final_juego(bufferMsgAux);
-	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	mostrar_causa(bufferMsgAux);
-	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	// mostrar_titulo_final_juego(bufferMsgAux);
+	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	// mostrar_causa(bufferMsgAux);
+	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
 	// mostrar_tiempo_procesador(bufferMsgAux);
 	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
 	// mostrar_tiempo_hay_linea(bufferMsgAux);
 	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
 	// mostrar_tiempo_humano(bufferMsgAux);
 	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	// mostrar_estadisticas(bufferMsgAux);
-	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	mostrar_estadisticas(bufferMsgAux);
+	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
 	// mostrar_volver_a_jugar(bufferMsgAux);
 	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
 	bufferMsgFinal[index] = '%';
@@ -662,16 +660,15 @@ void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
 
 
 //comienzo del juego, inicializa el tablero y muestra mensaje inicial por pantalla
-void juego_inicializar(void (*callback_fifo_encolar_param)(), void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM){
+void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM){
 	cuenta = 0;
 	intervalo = 0;
-	callback_fifo_encolar = callback_fifo_encolar_param;
 	GPIO_JUGAR_ERROR = GPIO_JUGAR_ERROR_PARAM;
 	GPIO_JUGAR_ERROR_BITS = GPIO_JUGAR_ERROR_BITS_PARAM;
 	callback_gpio_hal_sentido_param(GPIO_JUGAR_ERROR_PARAM, GPIO_JUGAR_ERROR_BITS_PARAM, GPIO_HAL_PIN_DIR_OUTPUT);
 	tablero_inicializar(&cuadricula);
 	conecta_K_test_cargar_tablero(&cuadricula); // igual habra que comentarlo, auqne en el enunciado habla algo sobre ello 
-	char bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n%";
+	uint8_t bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n%";
 	state = ESCRITURA_PAG_PRINCIPAL;
 	linea_serie_drv_enviar_array(bufferMsgIni);
 
@@ -826,3 +823,4 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 
 	
 }
+
