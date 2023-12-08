@@ -338,6 +338,108 @@ void conecta_K_visualizar_movimiento_juego(){// se puede llamar a una funcion nu
 
 }
 
+
+//---------------------------------------------------------------------------------------------------------------------
+//---------------------------------FUNCIONES DE AUXILIARES ------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
+
+
+//calcula el tiempo que tarda en mostrar el tablero
+void tiempo_visualizar_tablero(uint32_t t2){
+
+	uint32_t t3;
+	t3 = t2-t1;
+	conecta_K_visualizar_tiempo(t3);
+}
+
+int concatenar_array(char buffer1[], char buffer2[], int index){
+	int j=0;
+	while(buffer2[j] != '%'){
+		buffer1[index+j] = buffer2[j];
+		j++;
+	}
+	return index+j;
+}
+
+
+
+
+//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie
+void convesor_entero_char(uint32_t num, uint8_t array_digitos[]){
+	int numAux = num;
+	unsigned int longitud = 0;
+	while (numAux != 0) {
+        numAux /= 10;
+        longitud++;
+    }
+    // Crear un array para almacenar los dígitos
+    numAux = num;
+	array_digitos[longitud] = '\n';
+	array_digitos[longitud+1] = '%';
+    // Separar cada dígito y almacenarlo en el array
+    for (int i = longitud - 1; i >= 0; i--) {
+        array_digitos[i] = (numAux % 10) + '0';
+        numAux /= 10;
+    }
+	
+}
+
+//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie
+int convesor_entero_char_2(uint32_t num, uint8_t array_digitos[], int indice){
+	int numAux = num;
+	unsigned int longitud = 0;
+	while (numAux != 0) {
+        numAux /= 10;
+        longitud++;
+    }
+    // Crear un array para almacenar los dígitos
+    numAux = num;
+
+    // Separar cada dígito y almacenarlo en el array
+    for (int i = longitud - 1 + indice; i >= indice; i--) {
+        array_digitos[i] = (numAux % 10) + '0';
+        numAux /= 10;
+    }
+	
+	return longitud;
+}
+
+//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie
+int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
+	int numAux = num;
+	unsigned int longitud = 0;
+	if(num == 0){
+		longitud = 1;
+	}else{
+		while (numAux != 0) {
+        	numAux /= 10;
+        	longitud++;
+    	}
+	}
+
+    // Crear un array para almacenar los dígitos
+    numAux = num;
+
+    // Separar cada dígito y almacenarlo en el array
+    for (int i = longitud - 1 + indice; i >= indice; i--) {
+        array_digitos[i] = (numAux % 10) + '0';
+        numAux /= 10;
+    }
+	array_digitos[longitud] = '%';
+	return longitud+1;
+}
+
+//muestra el tiempo que tarda en mostrar el tablero, el cual ha sido previamente calculado
+void conecta_K_visualizar_tiempo(uint32_t num){
+	char array_digitos[300];
+	convesor_entero_char(num,array_digitos);
+	linea_serie_drv_enviar_array(array_digitos);
+}
+
+
+
+
+
 //---------------------------------------------------------------------------------------------------------------------
 //---------------------------------FUNCIONES DE VISUALIZACION TEXTO--------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------
@@ -438,28 +540,7 @@ void mostrar_tiempo_humano(char buffer[]){
 	buffer[ind] = '%';
 }
 
-//muestra el mensaje de movimiento cancelado por un jugador
-void mostrar_movimiento_cancelado(){
-	uint8_t bufferMsg[22] = "MOVIMIENTO CANCELADO\n%";
-	linea_serie_drv_enviar_array(bufferMsg);
-}
 
-//calcula el tiempo que tarda en mostrar el tablero
-void tiempo_visualizar_tablero(uint32_t t2){
-
-	uint32_t t3;
-	t3 = t2-t1;
-	conecta_K_visualizar_tiempo(t3);
-}
-
-int concatenar_array(char buffer1[], char buffer2[], int index){
-	int j=0;
-	while(buffer2[j] != '%'){
-		buffer1[index+j] = buffer2[j];
-		j++;
-	}
-	return index+j;
-}
 //muestra el numero total de eventos encolados y el numero de cada tipo
 void mostrar_estadisticas(char buffer[]){
 	
@@ -468,15 +549,15 @@ void mostrar_estadisticas(char buffer[]){
 	char bufferMsg[300];
 	int index = 0;
 	char bufferEstadistica[100];
-	int longitud = 0;
+	
 	uint32_t total_eventos = FIFO_estadisticas(VOID);
 	index = concatenar_array(bufferMsg, bufferMensajes[0], index);
-	longitud = convesor_entero_char_3((FIFO_estadisticas(0)), bufferEstadistica, 0); //revisar cuando el valor es 0
+	convesor_entero_char_3((FIFO_estadisticas(0)), bufferEstadistica, 0); //revisar cuando el valor es 0
 	index = concatenar_array(bufferMsg, bufferEstadistica, index);
 		
 	for(int i=1; i<NUMEVENTOS; i++){
 		index = concatenar_array(bufferMsg, bufferMensajes[i], index);
-		longitud = convesor_entero_char_3((FIFO_estadisticas(i)), bufferEstadistica, 0); //revisar cuando el valor es 0
+		convesor_entero_char_3((FIFO_estadisticas(i)), bufferEstadistica, 0); //revisar cuando el valor es 0
 		index = concatenar_array(bufferMsg, bufferEstadistica, index);
 		
 	}
@@ -522,78 +603,6 @@ void mostrar_estadisticas(char buffer[]){
 
 
 
-//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie
-void convesor_entero_char(uint32_t num, uint8_t array_digitos[]){
-	int numAux = num;
-	unsigned int longitud = 0;
-	while (numAux != 0) {
-        numAux /= 10;
-        longitud++;
-    }
-    // Crear un array para almacenar los dígitos
-    numAux = num;
-	array_digitos[longitud] = '\n';
-	array_digitos[longitud+1] = '%';
-    // Separar cada dígito y almacenarlo en el array
-    for (int i = longitud - 1; i >= 0; i--) {
-        array_digitos[i] = (numAux % 10) + '0';
-        numAux /= 10;
-    }
-	
-}
-
-//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie
-int convesor_entero_char_2(uint32_t num, uint8_t array_digitos[], int indice){
-	int numAux = num;
-	unsigned int longitud = 0;
-	while (numAux != 0) {
-        numAux /= 10;
-        longitud++;
-    }
-    // Crear un array para almacenar los dígitos
-    numAux = num;
-
-    // Separar cada dígito y almacenarlo en el array
-    for (int i = longitud - 1 + indice; i >= indice; i--) {
-        array_digitos[i] = (numAux % 10) + '0';
-        numAux /= 10;
-    }
-	
-	return longitud;
-}
-
-//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie
-int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
-	int numAux = num;
-	unsigned int longitud = 0;
-	if(num == 0){
-		longitud = 1;
-	}else{
-		while (numAux != 0) {
-        	numAux /= 10;
-        	longitud++;
-    	}
-	}
-
-    // Crear un array para almacenar los dígitos
-    numAux = num;
-
-    // Separar cada dígito y almacenarlo en el array
-    for (int i = longitud - 1 + indice; i >= indice; i--) {
-        array_digitos[i] = (numAux % 10) + '0';
-        numAux /= 10;
-    }
-	array_digitos[longitud] = '%';
-	return longitud+1;
-}
-
-//muestra el tiempo que tarda en mostrar el tablero, el cual ha sido previamente calculado
-void conecta_K_visualizar_tiempo(uint32_t num){
-	char array_digitos[300];
-	convesor_entero_char(num,array_digitos);
-	linea_serie_drv_enviar_array(array_digitos);
-}
-
 void mostrar_volver_a_jugar(char buffer[]){
 	char bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
 	int ind = concatenar_array(buffer,bufferMsg,0);
@@ -602,16 +611,18 @@ void mostrar_volver_a_jugar(char buffer[]){
 	
 }
 
-void mostrar_error_juego(){
-	char bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
+//muestra el mensaje de movimiento cancelado por un jugador
+void mostrar_movimiento_cancelado(){
+	uint8_t bufferMsg[22] = "MOVIMIENTO CANCELADO\n%";
 	linea_serie_drv_enviar_array(bufferMsg);
 }
 
 
 
-
-
-
+void mostrar_error_juego(){
+	char bufferMsg[300] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
+	linea_serie_drv_enviar_array(bufferMsg);
+}
 
 // funcion que muestra la pantalla final en la cual se encuentra la causa, tiempo total de uso del procesador, tiempo
 // total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
@@ -625,16 +636,16 @@ void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
 	mostrar_causa(bufferMsgAux);
 	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	mostrar_tiempo_procesador(bufferMsgAux);
-	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	mostrar_tiempo_hay_linea(bufferMsgAux);
-	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	mostrar_tiempo_humano(bufferMsgAux);
-	index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	 mostrar_estadisticas(bufferMsgAux);
-	 index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
-	 mostrar_volver_a_jugar(bufferMsgAux);
-	 index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	// mostrar_tiempo_procesador(bufferMsgAux);
+	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	// mostrar_tiempo_hay_linea(bufferMsgAux);
+	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	// mostrar_tiempo_humano(bufferMsgAux);
+	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	// mostrar_estadisticas(bufferMsgAux);
+	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
+	// mostrar_volver_a_jugar(bufferMsgAux);
+	// index = concatenar_array(bufferMsgFinal,bufferMsgAux,index);
 	bufferMsgFinal[index] = '%';
 	linea_serie_drv_enviar_array(bufferMsgFinal);
 
