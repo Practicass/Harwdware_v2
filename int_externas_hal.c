@@ -1,10 +1,11 @@
 
 #include "int_externas_hal.h"
-static void (*callback_fifo_encolar_eint1)();
-static void (*callback_fifo_encolar_eint2)();
-static uint8_t BOTON1;
-static uint8_t BOTON2;
 
+
+static void (*callback_fifo_encolar_eint1)(); 		//puntero a la funcion que encola el evento para la interrupcion externa 1
+static void (*callback_fifo_encolar_eint2)();		//puntero a la funcion que encola el evento	para la interrupcion externa 2
+static uint8_t BOTON1;								
+static uint8_t BOTON2;								
 
 //// variable para comprobar que se hacen las interrupciones que deber?an hacerse
 //static volatile unsigned int eint1_count = 0;
