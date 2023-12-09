@@ -233,17 +233,16 @@ int tablero_to_array(uint8_t bufferTablero[]){
 //muestra el tablero final y muestra el número del jugador que ha ganado
 void conecta_K_visualizar_tablero_ganador(){
 	uint8_t bufferTablero[300];
-	t1 = clock_get_us();
-	//se visualiza el tablero
-	conecta_K_visualizar_tablero(&cuadricula, salida);
+	t1 = clock_get_us();								//se obtiene el tiempo actual
+	conecta_K_visualizar_tablero(&cuadricula, salida);	//se visualiza el tablero
 	
 	int ind = tablero_to_array(bufferTablero);
 	uint8_t bufferAux[42] = "Ganador:  \n***************************\n\n%";
-	bufferAux[9] = turno +'0';
+	bufferAux[9] = turno +'0';							//se introduce el numero del jugador ganador
 	
 	ind = concatenar_array(bufferTablero, bufferAux, ind);
 
-	bufferTablero[ind] = '%';
+	bufferTablero[ind] = '%';							//se introduce el caracter de fin de buffer
 	linea_serie_drv_enviar_array(bufferTablero);
 }
 
@@ -252,15 +251,15 @@ void conecta_K_visualizar_tablero_ganador(){
 //muestra el estado actual del tablereo y el turno del jugador que le corresponde
 void conecta_K_visualizar_tablero_juego(){
 	uint8_t bufferTablero[300];
-	t1 = clock_get_us();
-	//se visualiza el tablero
-	conecta_K_visualizar_tablero(&cuadricula, salida);
+	t1 = clock_get_us();								//se obtiene el tiempo actual
+	
+	conecta_K_visualizar_tablero(&cuadricula, salida);	//se visualiza el tablero
 	
 	int ind = tablero_to_array(bufferTablero);
 	uint8_t bufferAux[40] = "Turno:  \n***************************\n\n%";
-	bufferAux[7] = turno +'0';
+	bufferAux[7] = turno +'0';							//se introduce el numero del jugador que le toca mover
 	ind = concatenar_array(bufferTablero, bufferAux, ind);
-	bufferTablero[ind] = '%';
+	bufferTablero[ind] = '%';							//se introduce el caracter de fin de buffer	
 	linea_serie_drv_enviar_array(bufferTablero);
 }
 
@@ -273,15 +272,16 @@ void conecta_K_visualizar_movimiento_juego(){// se puede llamar a una funcion nu
 	conecta_K_visualizar_tablero(&cuadricula, salida);
 
 	int ind = tablero_to_array(bufferTablero);
-	if(turno==1){
+	//se introduce el caracter correspondiente al jugador que ha realizado el movimiento
+	if(turno==1){									
 		bufferTablero[fila*8*2+columna*2+fila] = 'B';
 	}else if(turno ==2){
 		bufferTablero[fila*8*2+columna*2+fila] = 'N' ;
 	}
+	//se muestra el mensaje de movimiento cancelado
 	uint8_t bufferAux[65] = "PULSA EL BOTON 1 PARA CANCELAR\n***************************\n\n%";
 	ind = concatenar_array(bufferTablero, bufferAux, ind);
-	bufferTablero[ind] = '%';
-
+	bufferTablero[ind] = '%';							//se introduce el caracter de fin de buffer	
 	linea_serie_drv_enviar_array(bufferTablero);
 
 }
@@ -311,9 +311,10 @@ int mostrar_titulo_final_juego(uint8_t buffer[], int index){ //0 -> victoria, 1 
 //introduce en el buffer el motivo de finalización de partida y devuelve el nuevo indice del buffer 
 int mostrar_causa(uint8_t buffer[], int index){
 	int ind;
+	//depende de la razon que ha acabado la partida se muestra un mensaje u otro
 	if(reason == 0){
 		uint8_t bufferMsg[32] = "CAUSA: VICTORIA DEL JUGADOR  \n%";
-		bufferMsg[28] = turno +'0';
+		bufferMsg[28] = turno +'0';						//se introduce el numero del jugador ganador
 		ind = concatenar_array(buffer,bufferMsg,index);
 
 	}else if(reason == 1){
@@ -325,22 +326,21 @@ int mostrar_causa(uint8_t buffer[], int index){
 		ind = concatenar_array(buffer,bufferMsg,index);
 	
 	}
-
-	return ind;
+	return ind;											//devuelve el nuevo indice del buffer
 
 	
 }
 
 //introduce en el buffer el tiempo total del uso del procesador y devuelve el nuevo indice del buffer 
 int mostrar_tiempo_procesador(uint8_t buffer[], int index){
-	uint32_t tTotalProcesador = t2Procesador -t1Procesador;
-	uint8_t bufferMsg[32] = "Tiempo de uso del procesador: %";
+	uint32_t tTotalProcesador = t2Procesador -t1Procesador;			//se calcula el tiempo total de uso del procesador
+	uint8_t bufferMsg[32] = "Tiempo de uso del procesador: %";		
 	int ind = concatenar_array(buffer, bufferMsg, index);
 	int aux = convesor_entero_char_3(tTotalProcesador, bufferMsg, 0);
 	ind = concatenar_array(buffer, bufferMsg, ind);
-	uint8_t bufferAux[6] = " us\n%";
+	uint8_t bufferAux[6] = " us\n%";								//se introduce las unidades, el salto de linea y el caracter de fin de buffer
 	ind = concatenar_array(buffer,bufferAux,ind);
-	return ind;
+	return ind;														//devuelve el nuevo indice del buffer
 }
 
 //introduce en el buffer el tiempo total y medio de computo de conecta_k_hay_linea y devuelve el nuevo indice del buffer 
@@ -352,16 +352,15 @@ int mostrar_tiempo_hay_linea(uint8_t buffer[], int index){
 	uint8_t bufferAux[100] = "  Media: %";
 	ind = concatenar_array(buffer, bufferAux, ind);
 	int aux2 = convesor_entero_char_3(sumHayLinea/numHayLinea, bufferMsg, 0);
-	bufferMsg[aux2] = '%';
+	bufferMsg[aux2] = '%';								//se introduce el caracter de fin de buffer
 	ind = concatenar_array(buffer,bufferMsg,ind);
-	return ind;
+	return ind;											//devuelve el nuevo indice del buffer
 
 }
 
 //introduce en el buffer el tiempo total y medio que tardan los jugadores en introucir una jugada y devuelve el nuevo indice del buffer 
 int mostrar_tiempo_humano(uint8_t buffer[], int index){
-	// char bufferMsg[3]="h\n%";
-	// linea_serie_drv_enviar_array(bufferMsg);
+	
 	uint8_t bufferMsg[100] = "\nTiempo del humano en pensar\nTotal: %";
 	int ind = concatenar_array(buffer, bufferMsg, index);
 	int aux = convesor_entero_char_3(sumHumano, bufferMsg, 0);
@@ -369,36 +368,38 @@ int mostrar_tiempo_humano(uint8_t buffer[], int index){
 	uint8_t bufferAux[100] = "  Media: %";
 	ind = concatenar_array(buffer, bufferAux, ind);
 	int aux2 = convesor_entero_char_3(sumHumano/numHumano, bufferMsg, 0);
-	bufferMsg[aux2] = '%';
+	bufferMsg[aux2] = '%';								//se introduce el caracter de fin de buffer
 	ind = concatenar_array(buffer,bufferMsg,ind);
-	return ind;
+	return ind;											//devuelve el nuevo indice del buffer
 }
 
 
 //muestra el numero total de eventos encolados y el numero de cada tipo de evento de cada partida y devuelve el nuevo indice del buffer 
 int mostrar_estadisticas(uint8_t buffer[], int index2){
 	
+	//array con los tipos de eventos que se van a mostrar por pantalla
 	uint8_t bufferMensajes[NUMEVENTOS][25] = {"\nTOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
-	//uint8_t bufferMsg[300];
+	
 	int index = 0;
 	uint8_t bufferEstadistica[100];
 	
 	uint32_t total_eventos = callback_fifo_estadisticas(VOID);
 	index = concatenar_array(buffer, bufferMensajes[0], index2);
-	convesor_entero_char_3((callback_fifo_estadisticas(0)), bufferEstadistica, 0); //pasar por parametro la funcion fifo_estadisticas (callback)
+	convesor_entero_char_3((callback_fifo_estadisticas(0)), bufferEstadistica, 0); 
 	index = concatenar_array(buffer, bufferEstadistica, index);
-		
+	
+	//se recorre el array de mensajes y se introduce en el buffer el numero de cada tipo de evento
 	for(int i=1; i<NUMEVENTOS; i++){
 		index = concatenar_array(buffer, bufferMensajes[i], index);
-		convesor_entero_char_3((callback_fifo_estadisticas(i)), bufferEstadistica, 0); ///pasar por parametro la funcion fifo_estadisticas (callback)
+		convesor_entero_char_3((callback_fifo_estadisticas(i)), bufferEstadistica, 0); 
 		index = concatenar_array(buffer, bufferEstadistica, index);
 		
 	}
 	buffer[index] = '\n';
 	//bufferMsg[index+1] = '%';
 	//int ind = concatenar_array(buffer,bufferMsg,0);
-	return index+1;
+	return index+1;											//devuelve el nuevo indice del buffer
 }
 
 
@@ -407,8 +408,8 @@ int mostrar_estadisticas(uint8_t buffer[], int index2){
 int mostrar_volver_a_jugar(uint8_t buffer[], int index){
 	uint8_t bufferMsg[120] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
 	int ind = concatenar_array(buffer,bufferMsg,index);
-	buffer[ind] = '%';
-	return ind+1;
+	buffer[ind] = '%';									//se introduce el caracter de fin de buffer
+	return ind+1;										//devuelve el nuevo indice del buffer
 
 	
 }
@@ -420,8 +421,9 @@ void mostrar_movimiento_cancelado(){
 }
 
 
-//muestra por linea serie el mensaje de error correspondiente
-void mostrar_error_juego(int razon){ // 0-> comando erroneo, 1-> fila-columna invalida
+//muestra por linea serie el mensaje de error correspondiente,  0 -> comando erroneo, 1 -> fila-columna invalida
+void mostrar_error_juego(int razon){ 
+	//depende del tipo de error se muestra un mensaje u otro
 	if(razon == 0){
 		uint8_t bufferMsg[100] = "*****************************\nCOMANDO ERRONEO\n*****************************\n\n%";
 		linea_serie_drv_enviar_array(bufferMsg);
