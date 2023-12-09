@@ -4,10 +4,11 @@
 
 #include <inttypes.h> 
 
-#define NUMEVENTOS 12
+
+#define NUMEVENTOS 12                   // Definicion del numero de eventos
 
 
-
+// Definicion de los eventos
 enum ID_EVENTO
 {
     VOID = 0,
@@ -24,9 +25,11 @@ enum ID_EVENTO
     ev_JUEGO = 11
 };
 
-typedef uint8_t EVENTO_T;
 
-typedef struct EVENTOS{
+typedef uint8_t EVENTO_T;               // Definicion del tipo EVENTO_T 
+
+
+typedef struct EVENTOS{                 // Definicion de la estructura EVENTOS
     EVENTO_T id;
     uint32_t auxData;
 } EVENTOS;
