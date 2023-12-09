@@ -75,7 +75,7 @@ static  state = PAG_PRINCIPAL; // se establece el estado inicial
 //calcula el tiempo que tarda en mostrar el tablero (practica 2c)
 void tiempo_visualizar_tablero(uint32_t t2){
 
-	uint32_t t3;
+	uint32_t t3; 										// t3 = diferencia entre el tiempo previo a visualizar el tablero y el tiempo tras su visualización
 	t3 = t2-t1;
 	conecta_K_visualizar_tiempo(t3);
 }
@@ -83,12 +83,12 @@ void tiempo_visualizar_tablero(uint32_t t2){
 //rellena el buffer 1 con el contenido de buffer 2 a partir de index. 
 //Devuelve el indice de la última compononete + 1 que ha sido rellenada
 int concatenar_array(uint8_t buffer1[], uint8_t buffer2[], int index){
-	int j=0;
-	while(buffer2[j] != '%'){
-		buffer1[index+j] = buffer2[j];
+	int j=0;											//variable auxiliar del bucle
+	while(buffer2[j] != '%'){							//mientras el carcter es distinto al caracter de finalización del buffer '%'
+		buffer1[index+j] = buffer2[j];					//se copia la componente j en la componente correpondiente en el buffer1
 		j++;
 	}
-	return index+j;
+	return index+j;										//se devuelve el siguiente indice al ultimo que ha sido relleneado
 }
 
 
@@ -96,27 +96,29 @@ int concatenar_array(uint8_t buffer1[], uint8_t buffer2[], int index){
 
 //funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer se añade los caracteres '\n' y '%'
 void convesor_entero_char(uint32_t num, uint8_t array_digitos[]){
-	int numAux = num;
-	unsigned int longitud = 0;
+	int numAux = num;									//realizamos una copia del array para no modificarlo
+	//calculamos la longitud del vector
+	unsigned int longitud = 0;							
 	while (numAux != 0) {
         numAux /= 10;
         longitud++;
     }
     // Crear un array para almacenar los dígitos
     numAux = num;
-	array_digitos[longitud] = '\n';
+	array_digitos[longitud] = '\n';						//en la última posicion del vector colocamos el salto de linea y nuestro caracter de fin de buffer
 	array_digitos[longitud+1] = '%';
     // Separar cada dígito y almacenarlo en el array
-    for (int i = longitud - 1; i >= 0; i--) {
+    for (int i = longitud - 1; i >= 0; i--) {			//copiamos cada digito en el array
         array_digitos[i] = (numAux % 10) + '0';
         numAux /= 10;
     }
 	
 }
 
-//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer no se añade los caracteres '\n' y '%'
+//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer no se añade los caracteres '\n' y '%' y devuelve la longitud del numero
 int convesor_entero_char_2(uint32_t num, uint8_t array_digitos[], int indice){
-	int numAux = num;
+	int numAux = num;									//realizamos una copia del array para no modificarlo
+	//calculamos la longitud del vector
 	unsigned int longitud = 0;
 	while (numAux != 0) {
         numAux /= 10;
@@ -126,22 +128,24 @@ int convesor_entero_char_2(uint32_t num, uint8_t array_digitos[], int indice){
     numAux = num;
 
     // Separar cada dígito y almacenarlo en el array
-    for (int i = longitud - 1 + indice; i >= indice; i--) {
+    for(int i = longitud - 1 + indice;i >= indice;i--){	//copiamos cada digito en el array
         array_digitos[i] = (numAux % 10) + '0';
         numAux /= 10;
     }
 	
-	return longitud;
+	return longitud;									//devuelve la longitud del número
 }
 
 //funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer se añade el caracterer '%' 
-//y si num = 0 devuelve el caracter 0
+//y si num = 0 devuelve el caracter 0. Ademas devuelve la longitud del array
 int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
-	int numAux = num;
+	int numAux = num;									//realizamos una copia del array para no modificarlo
 	unsigned int longitud = 0;
+	//si el numero es 0 la longuitud es 1 digito
 	if(num == 0){
 		longitud = 1;
 	}else{
+		//sino es 0, se calcula la longitud
 		while (numAux != 0) {
         	numAux /= 10;
         	longitud++;
@@ -152,12 +156,12 @@ int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
     numAux = num;
 
     // Separar cada dígito y almacenarlo en el array
-    for (int i = longitud - 1 + indice; i >= indice; i--) {
+    for(int i = longitud - 1 + indice;i >= indice;i--){	//copiamos cada digito en el array
         array_digitos[i] = (numAux % 10) + '0';
         numAux /= 10;
     }
 	array_digitos[longitud] = '%';
-	return longitud+1;
+	return longitud+1;									//devuelve la longitud del array
 }
 
 //muestra el tiempo que tarda en mostrar el tablero, el cual ha sido previamente calculado
@@ -288,9 +292,10 @@ void conecta_K_visualizar_movimiento_juego(){// se puede llamar a una funcion nu
 //---------------------------------------------------------------------------------------------------------------------
 
 
-//introduce en el buffer el titulo de partida fin
+//introduce en el buffer el titulo de partida fin y devuelve el nuevo indice del buffer 
 int mostrar_titulo_final_juego(uint8_t buffer[], int index){ //0 -> victoria, 1 -> cancel, 2 -> end
 	int ind;
+	//depende de la razon que ha acabado la partida se muestra un mensaje u otro
 	if (reason == 1 || reason == 2){
 		uint8_t bufferMsgFin[38] = "FIN DE LA PARTIDA\nPARTIDA CANCELADA\n%";
 		ind = concatenar_array(buffer,bufferMsgFin,index);
@@ -299,11 +304,11 @@ int mostrar_titulo_final_juego(uint8_t buffer[], int index){ //0 -> victoria, 1 
 		ind = concatenar_array(buffer,bufferMsgFin,index);
 
 	}
-	return ind;
+	return ind;											//devuelve el nuevo indice del buffer
 	
 }
 
-//introduce en el buffer el motivo de finalización de partida
+//introduce en el buffer el motivo de finalización de partida y devuelve el nuevo indice del buffer 
 int mostrar_causa(uint8_t buffer[], int index){
 	int ind;
 	if(reason == 0){
@@ -326,7 +331,7 @@ int mostrar_causa(uint8_t buffer[], int index){
 	
 }
 
-//introduce en el buffer el tiempo total del uso del procesador 
+//introduce en el buffer el tiempo total del uso del procesador y devuelve el nuevo indice del buffer 
 int mostrar_tiempo_procesador(uint8_t buffer[], int index){
 	uint32_t tTotalProcesador = t2Procesador -t1Procesador;
 	uint8_t bufferMsg[32] = "Tiempo de uso del procesador: %";
@@ -338,7 +343,7 @@ int mostrar_tiempo_procesador(uint8_t buffer[], int index){
 	return ind;
 }
 
-//introduce en el buffer el tiempo total y medio de computo de conecta_k_hay_linea
+//introduce en el buffer el tiempo total y medio de computo de conecta_k_hay_linea y devuelve el nuevo indice del buffer 
 int mostrar_tiempo_hay_linea(uint8_t buffer[], int index){
 	uint8_t bufferMsg[100] = "Tiempo de computo de conecta_k_hay_linea\nTotal: %";
 	int ind = concatenar_array(buffer, bufferMsg, index);
@@ -353,7 +358,7 @@ int mostrar_tiempo_hay_linea(uint8_t buffer[], int index){
 
 }
 
-//introduce en el buffer el tiempo total y medio que tardan los jugadores en introucir una jugada
+//introduce en el buffer el tiempo total y medio que tardan los jugadores en introucir una jugada y devuelve el nuevo indice del buffer 
 int mostrar_tiempo_humano(uint8_t buffer[], int index){
 	// char bufferMsg[3]="h\n%";
 	// linea_serie_drv_enviar_array(bufferMsg);
@@ -370,7 +375,7 @@ int mostrar_tiempo_humano(uint8_t buffer[], int index){
 }
 
 
-//muestra el numero total de eventos encolados y el numero de cada tipo de evento de cada partida
+//muestra el numero total de eventos encolados y el numero de cada tipo de evento de cada partida y devuelve el nuevo indice del buffer 
 int mostrar_estadisticas(uint8_t buffer[], int index2){
 	
 	uint8_t bufferMensajes[NUMEVENTOS][25] = {"\nTOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
@@ -398,7 +403,7 @@ int mostrar_estadisticas(uint8_t buffer[], int index2){
 
 
 
-//introduce en el buffer el mensaje con las indicaciones para empezar una nueva partida
+//introduce en el buffer el mensaje con las indicaciones para empezar una nueva partida y devuelve el nuevo indice del buffer 
 int mostrar_volver_a_jugar(uint8_t buffer[], int index){
 	uint8_t bufferMsg[120] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
 	int ind = concatenar_array(buffer,bufferMsg,index);
@@ -432,17 +437,17 @@ void mostrar_error_juego(int razon){ // 0-> comando erroneo, 1-> fila-columna in
 // y el total de eventos encolados en la cola de eventos.
 void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
 	uint8_t bufferMsgFinal[600];
-	uint8_t bufferMsgAux[300];
+	//uint8_t bufferMsgAux[300];
 	int index = 0;
-
-	index = mostrar_titulo_final_juego(bufferMsgFinal, 0);
+	//introducimos en el bufferMsgFinal el texto a imprimir en pantalla
+	index = mostrar_titulo_final_juego(bufferMsgFinal, index);
 	index = mostrar_causa(bufferMsgFinal, index);
 	index = mostrar_tiempo_procesador(bufferMsgFinal, index);
 	index = mostrar_tiempo_hay_linea(bufferMsgFinal, index);
 	index = mostrar_tiempo_humano(bufferMsgFinal, index);
 	index = mostrar_estadisticas(bufferMsgFinal, index);
 	index = mostrar_volver_a_jugar(bufferMsgFinal, index);
-	bufferMsgFinal[index] = '%';
+	bufferMsgFinal[index] = '%';						//se coloca el caracter de final de buffer
 	linea_serie_drv_enviar_array(bufferMsgFinal);
 
 }
@@ -450,6 +455,7 @@ void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
 
 //funcion que reinicia la matriz "salida"
 void limpiar_salida(){
+	//recorre toda la matriz y pone cada componente a 0
 	for(int i=0; i<7; i++){
 			for(int j=0; j<7; j++){
 				salida[i][j] = 0;
@@ -460,7 +466,7 @@ void limpiar_salida(){
 
 //funcion que reinicia las estadisticas de la cola fifo
 void reiniciar_estadisticas(){
-	callback_fifo_reiniciar_estadisticas(); // hay que pasarlo por parametros
+	callback_fifo_reiniciar_estadisticas(); 
 }
 
 
@@ -473,19 +479,19 @@ void reiniciar_estadisticas(){
 
 //comienzo del juego, inicializa el tablero y muestra mensaje inicial por pantalla
 void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), uint32_t (*callback_gpio_hal_leer_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM, uint32_t (*callback_fifo_estadisticas_param)(), void (*callback_fifo_reiniciar_estadisticas_param)()){
-	cuenta = 0;
+	cuenta = 0;											//inicializamos las variables
 	intervalo = 0;
-	GPIO_JUGAR_ERROR = GPIO_JUGAR_ERROR_PARAM;
+	GPIO_JUGAR_ERROR = GPIO_JUGAR_ERROR_PARAM;			//asignamos a cada variable el valor correspondiente pasado por parametros
 	GPIO_JUGAR_ERROR_BITS = GPIO_JUGAR_ERROR_BITS_PARAM;
 	callback_gpio_hal_sentido_param(GPIO_JUGAR_ERROR_PARAM, GPIO_JUGAR_ERROR_BITS_PARAM, GPIO_HAL_PIN_DIR_OUTPUT);
 	callback_gpio_hal_escribir = callback_gpio_hal_escribir_param;
 	callback_gpio_hal_leer = callback_gpio_hal_leer_param;
 	callback_fifo_estadisticas = callback_fifo_estadisticas_param;
 	callback_fifo_reiniciar_estadisticas = callback_fifo_reiniciar_estadisticas_param;
-	tablero_inicializar(&cuadricula);
+	tablero_inicializar(&cuadricula);					//inicalizamos el tablero
 	uint8_t bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n%";
 	state = ESCRITURA_PAG_PRINCIPAL;
-	linea_serie_drv_enviar_array(bufferMsgIni);
+	linea_serie_drv_enviar_array(bufferMsgIni);			
 
 }
 
