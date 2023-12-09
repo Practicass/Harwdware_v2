@@ -141,3 +141,9 @@ void alarma_tratar_evento(void){
 				i++;
     }
 }
+
+
+
+
+
+

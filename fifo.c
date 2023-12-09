@@ -124,3 +124,16 @@ uint32_t FIFO_estadisticas(EVENTO_T ID_evento){
    
     
 }
+
+
+void FIFO_reiniciar_estadisticas(){
+    
+    int i = 0;
+    while(i < NUMEVENTOS){
+        cola.contador[i] = 0;
+        i++;
+    }
+}
+
+
+

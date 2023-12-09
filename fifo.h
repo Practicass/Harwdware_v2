@@ -25,6 +25,8 @@ uint8_t FIFO_extraer(EVENTO_T *ID_evento, uint32_t* auxData);
 uint32_t FIFO_estadisticas(EVENTO_T ID_evento);
 
 
+void FIFO_reiniciar_estadisticas(void);
+
 
 
 
