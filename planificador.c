@@ -21,7 +21,7 @@ void planificador(){
 		//
 		linea_serie_drv_inicializar(FIFO_encolar, ev_RX_SERIE,ev_TX_SERIE, gpio_hal_sentido, gpio_hal_escribir, GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, GPIO_HAL_PIN_DIR_OUTPUT);
 		botones_init(FIFO_encolar,alarma_activar);
-		juego_inicializar(gpio_hal_sentido, gpio_hal_escribir, GPIO_JUEGO_ERROR, GPIO_JUEGO_ERROR_BITS, GPIO_HAL_PIN_DIR_OUTPUT);
+		juego_inicializar(gpio_hal_sentido, gpio_hal_escribir, GPIO_JUEGO_ERROR, GPIO_JUEGO_ERROR_BITS, GPIO_HAL_PIN_DIR_OUTPUT, FIFO_estadisticas, FIFO_reiniciar_estadisticas);
 		//
 		WD_hal_inicializar(1);
 		WD_hal_feed();

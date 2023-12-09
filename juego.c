@@ -8,6 +8,8 @@ static volatile int primeraVez = 0;				//booleano que indica si es la primera ve
 static int GPIO_JUGAR_ERROR;					//valor del pin de error jugada incorrecta
 static int GPIO_JUGAR_ERROR_BITS;				//valor del tamaño en bits que corresponden al error 
 static void (*callback_gpio_hal_escribir)();	//puntero a la funcion gpio_hal_escribir
+static uint32_t (*callback_fifo_estadisticas)();	//puntero a la funcion FIFO_estadisticas
+static void (*callback_fifo_reiniciar_estadisticas)();	//puntero a la funcion FIFO_reiniciar_estadisticas
 static uint8_t salida[8][8];					//salida del tablero
 static TABLERO cuadricula;						//tablero de juego
 static uint32_t t1;								//tiempo previo a mostrar el tablero (demostrador practica 2c)
@@ -329,35 +331,27 @@ int mostrar_causa(uint8_t buffer[], int index){
 
 //introduce en el buffer el tiempo total del uso del procesador 
 int mostrar_tiempo_procesador(uint8_t buffer[], int index){
-	uint8_t bufferMsg[100] = "Tiempo de uso del procesador: ";
 	uint32_t tTotalProcesador = t2Procesador -t1Procesador;
-	int aux = convesor_entero_char_2(tTotalProcesador, bufferMsg, 31);
-
-	bufferMsg[31+aux] = 'u';
-	bufferMsg[31+aux+1] = 's';
-	bufferMsg[31+aux+2] = '\n';
-	bufferMsg[31+aux+3] = '%';
-	int ind = concatenar_array(buffer,bufferMsg,index);
+	uint8_t bufferMsg[32] = "Tiempo de uso del procesador: %";
+	int ind = concatenar_array(buffer, bufferMsg, index);
+	int aux = convesor_entero_char_3(tTotalProcesador, bufferMsg, 0);
+	ind = concatenar_array(buffer, bufferMsg, ind);
+	uint8_t bufferAux[6] = " us\n%";
+	ind = concatenar_array(buffer,bufferAux,ind);
 	return ind;
 }
 
 //introduce en el buffer el tiempo total y medio de computo de conecta_k_hay_linea
 int mostrar_tiempo_hay_linea(uint8_t buffer[], int index){
-	uint8_t bufferMsg[100] = "Tiempo de computo de conecta_k_hay_linea\nTotal:";
-	int aux = convesor_entero_char_2(sumHayLinea, bufferMsg, 48);
-	bufferMsg[48+aux] = ' ';
-	bufferMsg[48+aux+1] = 'M';
-	bufferMsg[48+aux+2] = 'e';
-	bufferMsg[48+aux+3] = 'd';
-	bufferMsg[48+aux+4] = 'i';
-	bufferMsg[48+aux+5] = 'a';
-	bufferMsg[48+aux+6] = ':';
-	bufferMsg[48+aux+7] = ' ';
-	int aux2 = convesor_entero_char_2(sumHayLinea/numHayLinea, bufferMsg, 48+aux+8);
-	bufferMsg[48+aux+8+aux2] = '\n';
-	bufferMsg[48+aux+8+aux2+1] = '%';
-
-	int ind = concatenar_array(buffer,bufferMsg,index);
+	uint8_t bufferMsg[100] = "Tiempo de computo de conecta_k_hay_linea\nTotal: %";
+	int ind = concatenar_array(buffer, bufferMsg, index);
+	int aux = convesor_entero_char_3(sumHayLinea, bufferMsg, 0);
+	ind = concatenar_array(buffer, bufferMsg, ind);
+	uint8_t bufferAux[100] = "  Media: %";
+	ind = concatenar_array(buffer, bufferAux, ind);
+	int aux2 = convesor_entero_char_3(sumHayLinea/numHayLinea, bufferMsg, 0);
+	bufferMsg[aux2] = '%';
+	ind = concatenar_array(buffer,bufferMsg,ind);
 	return ind;
 
 }
@@ -366,21 +360,15 @@ int mostrar_tiempo_hay_linea(uint8_t buffer[], int index){
 int mostrar_tiempo_humano(uint8_t buffer[], int index){
 	// char bufferMsg[3]="h\n%";
 	// linea_serie_drv_enviar_array(bufferMsg);
-	uint8_t bufferMsg[100] = "Tiempo del humano en pensar\nTotal:";
-	int aux = convesor_entero_char_2(sumHumano, bufferMsg, 35);
-	bufferMsg[35+aux] = ' ';
-	bufferMsg[35+aux+1] = 'M';
-	bufferMsg[35+aux+2] = 'e';
-	bufferMsg[35+aux+3] = 'd';
-	bufferMsg[35+aux+4] = 'i';
-	bufferMsg[35+aux+5] = 'a';
-	bufferMsg[35+aux+6] = ':';
-	bufferMsg[35+aux+7] = ' ';
-	int aux2 = convesor_entero_char_2(sumHumano/numHumano, bufferMsg, 35+aux+8);
-	bufferMsg[35+aux+8+aux2] = '\n';
-	bufferMsg[35+aux+8+aux2+1] = '%';
-
-	int ind = concatenar_array(buffer,bufferMsg,index);
+	uint8_t bufferMsg[100] = "\nTiempo del humano en pensar\nTotal: %";
+	int ind = concatenar_array(buffer, bufferMsg, index);
+	int aux = convesor_entero_char_3(sumHumano, bufferMsg, 0);
+	ind = concatenar_array(buffer, bufferMsg, ind);
+	uint8_t bufferAux[100] = "  Media: %";
+	ind = concatenar_array(buffer, bufferAux, ind);
+	int aux2 = convesor_entero_char_3(sumHumano/numHumano, bufferMsg, 0);
+	bufferMsg[aux2] = '%';
+	ind = concatenar_array(buffer,bufferMsg,ind);
 	return ind;
 }
 
@@ -388,20 +376,20 @@ int mostrar_tiempo_humano(uint8_t buffer[], int index){
 //muestra el numero total de eventos encolados y el numero de cada tipo de evento de cada partida
 int mostrar_estadisticas(uint8_t buffer[], int index2){
 	
-	uint8_t bufferMensajes[NUMEVENTOS][25] = {"TOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
+	uint8_t bufferMensajes[NUMEVENTOS][25] = {"\nTOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
 	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
 	//uint8_t bufferMsg[300];
 	int index = 0;
 	uint8_t bufferEstadistica[100];
 	
-	uint32_t total_eventos = FIFO_estadisticas(VOID);
+	uint32_t total_eventos = callback_fifo_estadisticas(VOID);
 	index = concatenar_array(buffer, bufferMensajes[0], index2);
-	convesor_entero_char_3((FIFO_estadisticas(0)), bufferEstadistica, 0); //pasar por parametro la funcion fifo_estadisticas (callback)
+	convesor_entero_char_3((callback_fifo_estadisticas(0)), bufferEstadistica, 0); //pasar por parametro la funcion fifo_estadisticas (callback)
 	index = concatenar_array(buffer, bufferEstadistica, index);
 		
 	for(int i=1; i<NUMEVENTOS; i++){
 		index = concatenar_array(buffer, bufferMensajes[i], index);
-		convesor_entero_char_3((FIFO_estadisticas(i)), bufferEstadistica, 0); ///pasar por parametro la funcion fifo_estadisticas (callback)
+		convesor_entero_char_3((callback_fifo_estadisticas(i)), bufferEstadistica, 0); ///pasar por parametro la funcion fifo_estadisticas (callback)
 		index = concatenar_array(buffer, bufferEstadistica, index);
 		
 	}
@@ -475,7 +463,7 @@ void limpiar_salida(){
 
 //funcion que reinicia las estadisticas de la cola fifo
 void reiniciar_estadisticas(){
-	FIFO_reiniciar_estadisticas(); // hay que pasarlo por parametros
+	callback_fifo_reiniciar_estadisticas(); // hay que pasarlo por parametros
 }
 
 
@@ -487,13 +475,15 @@ void reiniciar_estadisticas(){
 
 
 //comienzo del juego, inicializa el tablero y muestra mensaje inicial por pantalla
-void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM){
+void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM, uint32_t (*callback_fifo_estadisticas_param)(), void (*callback_fifo_reiniciar_estadisticas_param)()){
 	cuenta = 0;
 	intervalo = 0;
 	GPIO_JUGAR_ERROR = GPIO_JUGAR_ERROR_PARAM;
 	GPIO_JUGAR_ERROR_BITS = GPIO_JUGAR_ERROR_BITS_PARAM;
 	callback_gpio_hal_sentido_param(GPIO_JUGAR_ERROR_PARAM, GPIO_JUGAR_ERROR_BITS_PARAM, GPIO_HAL_PIN_DIR_OUTPUT);
 	callback_gpio_hal_escribir = callback_gpio_hal_escribir_param;
+	callback_fifo_estadisticas = callback_fifo_estadisticas_param;
+	callback_fifo_reiniciar_estadisticas = callback_fifo_reiniciar_estadisticas_param;
 	tablero_inicializar(&cuadricula);
 	uint8_t bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n%";
 	state = ESCRITURA_PAG_PRINCIPAL;
@@ -523,13 +513,13 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			
 			if((bufferTratarEvento[0] == 'N' && bufferTratarEvento[1] == 'E'&& bufferTratarEvento[2] == 'W')){
 				//comienza una nueva partida
-				reiniciar_estadisticas(); 						//reiniciamos las estadisticas para que correspondan a la partida actual
 				turno = turnoEmpieza;							//se establce el turno correspondiente
 				if(turnoEmpieza == 1){ 							//se cambia el turno para la siguiente partida 
 					turnoEmpieza = 2;
 				}else{
 					turnoEmpieza = 1;
 				}
+				reiniciar_estadisticas();						//reiniciamos las estadisticas para que correspondan a la partida actual
 				t1Procesador = clock_get_us();					//momento en el que comieza la partida
 				limpiar_tablero(&cuadricula);					//se vacia el tablero
 				limpiar_salida();								//se vacia la salida del tablero
@@ -546,13 +536,13 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 				intervalo = tiempo_actual - ultimaPulsacion;	//se calcula el tiempo desde la ultima pulsacion (practica 2b)
 				ultimaPulsacion = tiempo_actual;
 			}
-			reiniciar_estadisticas(); 							//reiniciamos las estadisticas para que correspondan a la partida actual
 			turno = turnoEmpieza;								//se establce el turno correspondiente
 			if(turnoEmpieza == 1){	 							//se cambia el turno para la siguiente partida 
 				turnoEmpieza = 2;
 			}else{
 				turnoEmpieza = 1;
 			}
+			reiniciar_estadisticas(); 							//reiniciamos las estadisticas para que correspondan a la partida actual
 			t1Procesador = clock_get_us();						//momento en el que comieza la partida
 			limpiar_tablero(&cuadricula);						//se vacia el tablero
 			limpiar_salida();									//se vacia la salida del tablero
@@ -561,110 +551,125 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			state = ESCRITURA_MOSTRAR_TABLERO;
 		}
 	}else if (state == ESCRITURA_MOSTRAR_TABLERO){ 				//estado de espera a que se escriba todo el buffer por linea serie
-		if(ID_evento == ev_TX_SERIE){ 							// evento que indica finalización de la escritura y se avanza al siguiente estado
+		if(ID_evento == ev_TX_SERIE){ 							//evento que indica finalización de la escritura y se avanza al siguiente estado
 			state = WAIT_COMANDO;
 			t1Humano = clock_get_us();							//se obtiene el tiempo actual
 		}
 
-	}else if (state == WAIT_COMANDO){ 
-		t2Humano = clock_get_us();
-		numHumano++;
-		sumHumano += t2Humano-t1Humano;
-		if (ID_evento == ev_RX_SERIE){ 
-			uint8_t bufferTratarEvento[5];
-			bufferTratarEvento[0] = (auxData >> 16 ) & 0xFF;
-			bufferTratarEvento[1] = (auxData >> 8) & 0xFF;
-			bufferTratarEvento[2] = (auxData) & 0xFF;
-			bufferTratarEvento[3] = '\n';
-			bufferTratarEvento[4] = '%';
+	}else if (state == WAIT_COMANDO){ 							//estado de espera a que un jugador introduzca una jugada o finalice la partida
+		t2Humano = clock_get_us();								//momento en el que introuce la jugada
+		numHumano++;											//aumenta en una unidad el numero de jugadas introducidas
+		sumHumano += t2Humano-t1Humano;							//se calcula la diferencia entre el tiempo inicial de la espera y el tiempo en que se introduce la jugada
+		if (ID_evento == ev_RX_SERIE){ 							//evento de comando introucido por linea serie
+			uint8_t bufferTratarEvento[5];						//buffer en el cual se introduce el comando para comprbar si es "END" o una jugada
+			bufferTratarEvento[0] = (auxData >> 16 ) & 0xFF;	//primer caracter
+			bufferTratarEvento[1] = (auxData >> 8) & 0xFF;		//segundo caracter
+			bufferTratarEvento[2] = (auxData) & 0xFF;			//tercer caracter
+			bufferTratarEvento[3] = '\n';						//caracter salto de linea
+			bufferTratarEvento[4] = '%';						//caracter que utilizamos como fin de buffer
+
+			//si el comando es "END" se finaliza la partida y se muestra por pantalla la pantalla final
 			if((bufferTratarEvento[0] == 'E' && bufferTratarEvento[1] == 'N'&& bufferTratarEvento[2] == 'D')){
-				callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0);
-				reason = 2;
-				t2Procesador = clock_get_us();
-				mostrar_pantalla_final_juego();
+				
+				callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); //revisar pq no siempre hay que limpiarlo
+				reason = 2;										//se establece el motivo del final de partida
+				t2Procesador = clock_get_us();					//se obtiene el momento del final de la partida
+				mostrar_pantalla_final_juego();					//se muestra la pantalla final
 				state = ESCRITURA_MOSTRAR_FIN;
 
-			}else if((bufferTratarEvento[0] >= '1' && bufferTratarEvento[0] <= '7' && bufferTratarEvento[1] == '-' && bufferTratarEvento[2] >= '1' && bufferTratarEvento[2] <= '7')){
-				fila = bufferTratarEvento[0] - '0';
-				columna = bufferTratarEvento[2] - '0';
+			//si el comadando es una jugada valida se comprueba que se puede colocar en el tablero y se realiza el movimiento
+			}else if((	bufferTratarEvento[0] >= '1' && bufferTratarEvento[0] <= '7' 
+						&& bufferTratarEvento[1] == '-' 
+						&& bufferTratarEvento[2] >= '1' && bufferTratarEvento[2] <= '7'))
+			{		
+				fila = bufferTratarEvento[0] - '0'; 			//se obtiene la fila
+				columna = bufferTratarEvento[2] - '0';			// se obtiene la columna
+				
+				//se comprueba si la celda esta vacia, es decir, se puede colocar la ficha
 				if (celda_vacia(tablero_leer_celda(&cuadricula, fila -1, columna -1))){
-					callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0);
-					conecta_K_visualizar_movimiento_juego();
+					callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); //revisar pq no siempre hay que limpiarlo
+					conecta_K_visualizar_movimiento_juego(); 	//se visualiza el movimiento introducido y el mensaje de cancelacion
 					state = ESCRITURA_COMANDO_CORRECTO;
-					alarma_activar(ev_JUEGO, 3000, 0);
+					alarma_activar(ev_JUEGO, 3000, 0); 			//alarma para permitir los tres segundos de cancelacion
 				}else{
-					//visualizar error
+					//celda ocupada y se muestra el led de error
 					callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 1);
-					mostrar_error_juego(1);
+					mostrar_error_juego(1); 					//se muestra el mensaje de error y su causa
 					state = ESCRITURA_MOSTRAR_ERROR;
 				}
+			
 			}else{
+				//comando introducido erroneo y se muestra el led de erroneo
 				callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 1);
-				mostrar_error_juego(0);
+				mostrar_error_juego(0); 						//se muestra el mensaje de error y su causa
 				state = ESCRITURA_MOSTRAR_ERROR;
 			}
-		}else if(ID_evento == BOTON && auxData == 2){
-			callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0);
-			uint64_t tiempo_actual;
+		}else if(ID_evento == BOTON && auxData == 2){ 			//evento de boton 2 pulsado
+			callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); //revisar pq no siempre hay que limpiarlo
+			uint64_t tiempo_actual;								//se obtiene el tiempo actual (practica 2b)
 			tiempo_actual = clock_get_us();
-			intervalo = tiempo_actual - ultimaPulsacion;
-			ultimaPulsacion = tiempo_actual;
-			reason = 1;
-			t2Procesador = clock_get_us();
-			mostrar_pantalla_final_juego();
+			intervalo = tiempo_actual - ultimaPulsacion; 		//se calcula el tiempo desde la ultima pulsacion (practica 2b)
+			ultimaPulsacion = tiempo_actual; 
+			reason = 1; 										//se establece el motivo del final de partida
+			t2Procesador = clock_get_us();						//se obtiene el momento del final de la partida
+			mostrar_pantalla_final_juego();						//se muestra la pantalla final
 			state = ESCRITURA_MOSTRAR_FIN;
 
 		}
-	}else if (state == ESCRITURA_COMANDO_CORRECTO){ //estado de espera a que se escriba todo el buffer por linea serie
-		if(ID_evento == ev_TX_SERIE){ 				// evento que indica finalización de la escritura y se avanza al siguiente estado
+	}else if (state == ESCRITURA_COMANDO_CORRECTO){ 			//estado de espera a que se escriba todo el buffer por linea serie
+		if(ID_evento == ev_TX_SERIE){ 							// evento que indica finalización de la escritura y se avanza al siguiente estado
 			state = WAIT_CANCELAR;
 		}
 	}else if (state == WAIT_CANCELAR){
-		if(ID_evento == ev_JUEGO){
+		if(ID_evento == ev_JUEGO){ 								//evento de jugada valida y no cancelada
+			//se inserta la ficha en el tablero
 			if(tablero_insertar_color(&cuadricula, fila-1, columna-1, turno) == EXITO) {
-					t1HayLinea = clock_get_us();
+					t1HayLinea = clock_get_us();				//se obtiene el tiempo previo a ejecutar conecta_k_hay_linea
+					//se comprueba si ha ganado un jugador
 					uint8_t hayLinea = conecta_K_verificar_K_en_linea(&cuadricula, fila-1, columna-1, turno);
-					t2HayLinea = clock_get_us();
-					sumHayLinea += t2HayLinea - t1HayLinea;
-					numHayLinea++;
+					t2HayLinea = clock_get_us();				//se obtiene el tiempo tras ejecutar conecta_k_hay_linea
+					sumHayLinea += t2HayLinea - t1HayLinea;		//se calcula el tiempo de computacion de conecta_k_hay_linea
+					numHayLinea++;								//aumenta en una unidad el numero de llamadas a conecta_k_hay_linea
+					//si hay victoria se acaba la partida
 					if(hayLinea){
 						state = ESCRITURA_TABLERO_FIN;
-						t2Procesador = clock_get_us();
-						conecta_K_visualizar_tablero_ganador();
-						reason = 0;
+						t2Procesador = clock_get_us(); 			//se obtiene el tiempo final de la partida
+						conecta_K_visualizar_tablero_ganador();	//se muestra la pantalla final
+						reason = 0;								//se establece la razon de final de partida por victoria
 					}else{
+						//si no hay victoria se cambia el turno 
 						if (turno == 1){
 							turno = 2;
 						}else{
 							turno = 1;
 						}
 						state = ESCRITURA_MOSTRAR_TABLERO;
-						conecta_K_visualizar_tablero_juego();		
+						conecta_K_visualizar_tablero_juego();	//se muestra el tablero con la nueva jugada y el turno correspondiente
 					}
 			}
 			
-		}else if(ID_evento == BOTON && auxData == 1){
-			alarma_activar(ev_JUEGO, 0, 0);
-			mostrar_movimiento_cancelado();
+		}else if(ID_evento == BOTON && auxData == 1){			//evento de boton 22 pulsado
+			alarma_activar(ev_JUEGO, 0, 0);						//se desactiva la alarma de cancelacion
+			mostrar_movimiento_cancelado();						//me muestra mensaje de movimiento cancelado
 			state = CANCELADO;
 		}
-	}else if ( state == CANCELADO){
-		if(ID_evento == ev_TX_SERIE){
-			conecta_K_visualizar_tablero_juego();
+	}else if ( state == CANCELADO){								//estado de espera a que se escriba todo el buffer por linea serie
+		if(ID_evento == ev_TX_SERIE){							// evento que indica finalización de la escritura y se avanza al siguiente estado
+			conecta_K_visualizar_tablero_juego();				//se muestra el tablero sin la jugada cancelada
 			state = WAIT_COMANDO;
-			t1Humano = clock_get_us();
+			t1Humano = clock_get_us();							//se obtiene el tiempo actual
 		}
-	}else if (state == ESCRITURA_TABLERO_FIN){ 		//estado de espera a que se escriba todo el buffer por linea serie
-		if(ID_evento == ev_TX_SERIE){ 				// evento que indica finalización de la escritura y se avanza al siguiente estado
+	}else if (state == ESCRITURA_TABLERO_FIN){ 					//estado de espera a que se escriba todo el buffer por linea serie
+		if(ID_evento == ev_TX_SERIE){ 							// evento que indica finalización de la escritura y se avanza al siguiente estado
 			mostrar_pantalla_final_juego();
 			state = ESCRITURA_MOSTRAR_FIN;
 		}
-	}else if ( state == ESCRITURA_MOSTRAR_FIN){ 	//estado de espera a que se escriba todo el buffer por linea serie
-		if(ID_evento == ev_TX_SERIE){ 				// evento que indica finalización de la escritura y se avanza al siguiente estado
+	}else if ( state == ESCRITURA_MOSTRAR_FIN){ 				//estado de espera a que se escriba todo el buffer por linea serie
+		if(ID_evento == ev_TX_SERIE){ 							// evento que indica finalización de la escritura y se avanza al siguiente estado
 			state = WAIT_INICIO_PARTIDA;
 		}
-	}else if(state == ESCRITURA_MOSTRAR_ERROR){ 	//estado de espera a que se escriba todo el buffer por linea serie
-		if(ID_evento == ev_TX_SERIE){ 				// evento que indica finalización de la escritura y se avanza al siguiente estado
+	}else if(state == ESCRITURA_MOSTRAR_ERROR){ 				//estado de espera a que se escriba todo el buffer por linea serie
+		if(ID_evento == ev_TX_SERIE){ 							// evento que indica finalización de la escritura y se avanza al siguiente estado
 			state = WAIT_COMANDO;
 		}
 	}
