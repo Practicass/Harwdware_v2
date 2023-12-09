@@ -12,6 +12,7 @@ static  int almacenar = 0;
 static void (*callback_fifo_encolar)();
 static void (*callback_gpio_hal_sentido)();
 static void (*callback_gpio_hal_escribir)();
+static uint32_t (*callback_gpio_hal_leer)();
 static volatile uint8_t evento_id_ev_RX_SERIE;
 static volatile uint8_t evento_id_ev_TX_SERIE;
 static volatile uint8_t GPIO_SERIE_ERROR;
@@ -22,8 +23,8 @@ static int contadorEscritura = 1;
 static unsigned int contadorAux = 0; 
 
 
-//void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_SERIE_ERROR, int GPIO_SERIE_ERROR_BITS, int GPIO_HAL_PIN_DIR_OUTPUT
-void linea_serie_drv_inicializar(void (*callback_fifo_encolar_param)(), uint8_t id_ev_RX_SERIE, uint8_t id_ev_TX_SERIE, void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_SERIE_ERROR_PARAM, int GPIO_SERIE_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM){
+
+void linea_serie_drv_inicializar(void (*callback_fifo_encolar_param)(), uint8_t id_ev_RX_SERIE, uint8_t id_ev_TX_SERIE, void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), uint32_t (*callback_gpio_hal_leer_param)(), int GPIO_SERIE_ERROR_PARAM, int GPIO_SERIE_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM){
     callback_fifo_encolar = callback_fifo_encolar_param;
 	evento_id_ev_RX_SERIE = id_ev_RX_SERIE;
     evento_id_ev_TX_SERIE = id_ev_TX_SERIE;
@@ -32,6 +33,7 @@ void linea_serie_drv_inicializar(void (*callback_fifo_encolar_param)(), uint8_t 
     GPIO_HAL_PIN_DIR_OUTPUT = GPIO_HAL_PIN_DIR_OUTPUT_PARAM;
     callback_gpio_hal_sentido = callback_gpio_hal_sentido_param;
     callback_gpio_hal_escribir = callback_gpio_hal_escribir_param;
+    callback_gpio_hal_leer = callback_gpio_hal_leer_param;
     callback_gpio_hal_sentido(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, GPIO_HAL_PIN_DIR_OUTPUT);
     linea_serie_hal_inicializar(linea_serie_drv_leer,linea_serie_drv_continuar_envio);
 }
@@ -40,9 +42,9 @@ void linea_serie_drv_leer(uint8_t caracter){
     if(caracter == '$'){ // comenzar� a almacenar en la siguiente interrupci�n
         almacenar = 1;
         numEscritura = 0;
-       // if(gpio_hal_leer(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS) == 1){
-        callback_gpio_hal_escribir(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, 0);
-       // }
+        if(callback_gpio_hal_leer(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS) == 1){
+            callback_gpio_hal_escribir(GPIO_SERIE_ERROR, GPIO_SERIE_ERROR_BITS, 0);
+        }
         
     }else if(almacenar && numEscritura == 3 && caracter == '!'){ // se recibe el caracter ! y se para de alamacenar
     

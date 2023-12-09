@@ -5,11 +5,11 @@
 
 
 struct fifo{
-    EVENTOS queue[TAM];
+    EVENTOS queue[TAM]; 
     int index_begin, index_end; // begin = eventos procesados  end= eventos encolados
     GPIO_HAL_PIN_T pin_overflow;
     int adelantado; // booleano que indica si los inidices estan adelantados o no
-    uint32_t contador[NUMEVENTOS];
+    uint32_t contador[NUMEVENTOS]; //contador para cada tipo de evento
 
 };
 
@@ -31,7 +31,7 @@ void FIFO_inicializar(GPIO_HAL_PIN_T pin_overflow, int GPIO_OVERFLOW_BITS_PARAM)
     
     while (i<=TAM){
         cola.queue[i].id = VOID;
-				cola.queue[i].auxData = 0;
+		cola.queue[i].auxData = 0;
         i++;
     }
     i = 0;
@@ -125,7 +125,7 @@ uint32_t FIFO_estadisticas(EVENTO_T ID_evento){
     
 }
 
-
+//Vacía la información de las estádisticas de todos los eventos de la cola fifo
 void FIFO_reiniciar_estadisticas(){
     
     int i = 0;

@@ -6,9 +6,9 @@
 #include "conecta_K_2023.h"
 #include "linea_serie_drv.h"
 #include "alarmas.h"
-#include "fifo.h"
 
-void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM, uint32_t (*callback_fifo_estadisticas_param)(), void (*callback_fifo_reiniciar_estadisticas_param)());
+
+void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), uint32_t (*callback_gpio_hal_leer_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM, uint32_t (*callback_fifo_estadisticas_param)(), void (*callback_fifo_reiniciar_estadisticas_param)());
 
 void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData);
 

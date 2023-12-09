@@ -43,7 +43,7 @@ gpio_hal_sentido( GPIO_HAL_PIN_T gpio_inicial, uint8_t num_bits,  enum gpio_hal_
 __inline static uint32_t
 gpio_hal_leer( GPIO_HAL_PIN_T gpio_inicial, uint8_t num_bits){
 	
-	return gpio_inicial >> (IOPIN & (~(0xFFFFFFFF << num_bits) << gpio_inicial));
+	return (IOPIN & (~(0xFFFFFFFF << num_bits) << gpio_inicial)) >> gpio_inicial ;
 	
 }
 

@@ -14,10 +14,12 @@ struct alarm{
 static struct alarm alarmas[ALARMAS_MAX];
 
 
-static int indexAlarms[NUMEVENTOS];
+static int indexAlarms[NUMEVENTOS]; // vector que guarda el indice del vector de alarmas de la alarma de cada evento, si no existe alarma para ese evento guardara un -1
 
 static void (*callback_fifo_encolar)();
 
+//Función que inicializa las estructuras de datos necesarias para el funcionamiento de las alarmas 
+//y activa un temporizador periodico cada 1ms
 void alarma_inicializar(void (*callback_fifo_encolar_param)()){
 
     int i = 0;
@@ -44,6 +46,7 @@ void alarma_inicializar(void (*callback_fifo_encolar_param)()){
     
 }
 
+//
 void alarma_activar(EVENTO_T ID_evento, uint32_t retardo, uint32_t
 auxData){
     int i = 0;

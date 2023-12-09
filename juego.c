@@ -1,39 +1,40 @@
 
 #include "juego.h"
 
-static volatile int cuenta;						//veces que se han pulsado los botones (practica 2b)
-static volatile int intervalo;					//tiempo (practica 2b)
-static volatile int ultimaPulsacion = 0;		//momento en el que se pulsa por última vez(practica 2b)
-static volatile int primeraVez = 0;				//booleano que indica si es la primera vez que se pulsa un boton (practica 2b)
-static int GPIO_JUGAR_ERROR;					//valor del pin de error jugada incorrecta
-static int GPIO_JUGAR_ERROR_BITS;				//valor del tamaño en bits que corresponden al error 
-static void (*callback_gpio_hal_escribir)();	//puntero a la funcion gpio_hal_escribir
-static uint32_t (*callback_fifo_estadisticas)();	//puntero a la funcion FIFO_estadisticas
+static volatile int cuenta;								//veces que se han pulsado los botones (practica 2b)
+static volatile int intervalo;							//tiempo (practica 2b)
+static volatile int ultimaPulsacion = 0;				//momento en el que se pulsa por última vez(practica 2b)
+static volatile int primeraVez = 0;						//booleano que indica si es la primera vez que se pulsa un boton (practica 2b)
+static int GPIO_JUGAR_ERROR;							//valor del pin de error jugada incorrecta
+static int GPIO_JUGAR_ERROR_BITS;						//valor del tamaño en bits que corresponden al error 
+static void (*callback_gpio_hal_escribir)();			//puntero a la funcion gpio_hal_escribir
+static uint32_t (*callback_gpio_hal_leer)();			//puntero a la funcion gpio_hal_leer
+static uint32_t (*callback_fifo_estadisticas)();		//puntero a la funcion FIFO_estadisticas
 static void (*callback_fifo_reiniciar_estadisticas)();	//puntero a la funcion FIFO_reiniciar_estadisticas
-static uint8_t salida[8][8];					//salida del tablero
-static TABLERO cuadricula;						//tablero de juego
-static uint32_t t1;								//tiempo previo a mostrar el tablero (demostrador practica 2c)
-static uint8_t turno = 1;						//indica a que jugador le toca mover ficha
-static uint32_t turnoEmpieza = 1; 				//numero del jugador que empieza la siguiente partida
-static uint8_t fila = 0;						//valor de la fila introducida por un jugador
-static uint8_t columna = 0;						//valor de la columna introducida por un jugador
-static uint8_t reason = 0; 						//causa del final de la partida: 0 -> victoria, 1 -> cancelada mediante boton, 2 -> comando end introducido
+static uint8_t salida[8][8];							//salida del tablero
+static TABLERO cuadricula;								//tablero de juego
+static uint32_t t1;										//tiempo previo a mostrar el tablero (demostrador practica 2c)
+static uint8_t turno = 1;								//indica a que jugador le toca mover ficha
+static uint32_t turnoEmpieza = 1; 						//numero del jugador que empieza la siguiente partida
+static uint8_t fila = 0;								//valor de la fila introducida por un jugador
+static uint8_t columna = 0;								//valor de la columna introducida por un jugador
+static uint8_t reason = 0; 								//causa del final de la partida: 0 -> victoria, 1 -> cancelada mediante boton, 2 -> comando end introducido
 
 //variables para calcular el tiempo del procesador en una partida
-static uint32_t t1Procesador; 					// tiempo de comienzo de la partida
-static uint32_t t2Procesador; 					// tiempo de final de partida
+static uint32_t t1Procesador; 							// tiempo de comienzo de la partida
+static uint32_t t2Procesador; 							// tiempo de final de partida
 
 //variables para calcular el tiempo de computo de la funcion conecta_k_hay_linea
-static uint32_t t1HayLinea; 					//tiempo previo a ejecutar conecta_k_hay_linea
-static uint32_t t2HayLinea; 					//tiempo tras ejecutar conecta_k_hay_linea
-static uint32_t sumHayLinea = 0;				//tiempo total  que se tarda en ejecutar conecta_k_hay_linea
-static uint32_t numHayLinea = 0; 				//numero de veces que se ejecuta conecta_k_hay_linea
+static uint32_t t1HayLinea; 							//tiempo previo a ejecutar conecta_k_hay_linea
+static uint32_t t2HayLinea; 							//tiempo tras ejecutar conecta_k_hay_linea
+static uint32_t sumHayLinea = 0;						//tiempo total  que se tarda en ejecutar conecta_k_hay_linea
+static uint32_t numHayLinea = 0; 						//numero de veces que se ejecuta conecta_k_hay_linea
 
 //variables para calcular el tiempo que les cuesta a los jugadoresa introducir una jugada
-static uint32_t t1Humano;						//tiempo desde que el usuario puede introducir un comando
-static uint32_t t2Humano;						//tiempo en el que el usuario introduce un comando  
-static uint32_t sumHumano = 0; 					//tiempo total  que tardan los jugadores en introducir un comando
-static uint32_t numHumano = 0; 					//numero de veces que los jugadores introducen un comando
+static uint32_t t1Humano;								//tiempo desde que el usuario puede introducir un comando
+static uint32_t t2Humano;								//tiempo en el que el usuario introduce un comando  
+static uint32_t sumHumano = 0; 							//tiempo total  que tardan los jugadores en introducir un comando
+static uint32_t numHumano = 0; 							//numero de veces que los jugadores introducen un comando
 
 
 
@@ -56,7 +57,7 @@ enum ESTADOS{
 	ESCRITURA_TABLERO_FIN = 12,
 	}
 
-static  state = PAG_PRINCIPAL;
+static  state = PAG_PRINCIPAL; // se establece el estado inicial
 
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -79,6 +80,8 @@ void tiempo_visualizar_tablero(uint32_t t2){
 	conecta_K_visualizar_tiempo(t3);
 }
 
+//rellena el buffer 1 con el contenido de buffer 2 a partir de index. 
+//Devuelve el indice de la última compononete + 1 que ha sido rellenada
 int concatenar_array(uint8_t buffer1[], uint8_t buffer2[], int index){
 	int j=0;
 	while(buffer2[j] != '%'){
@@ -165,10 +168,6 @@ void conecta_K_visualizar_tiempo(uint32_t num){
 }
 
 
-
-
-
-
 //---------------------------------------------------------------------------------------------------------------------
 //---------------------------------FUNCIONES DE VISUALIZACION TABLERO--------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------
@@ -178,41 +177,41 @@ void conecta_K_visualizar_tiempo(uint32_t num){
 int tablero_to_array(uint8_t bufferTablero[]){
 	int i=0;
 	int j=0;
-	int aux = 0;
+	int aux = 0;												//variable booleana, si su contenido es 0 introducirá un caracter del marco o del contenido del tablero, si su contenido es 1 se introducirá una barra de separación
 
-	while(i < 8){
+	while(i < 8){ 												//para cada fila del tablero que se va a introducir en bufferTablero
 		j=0;
-		while(j<8 || j==8 && aux == 1){
-			if(i==0){
+		while(j<8 || j==8 && aux == 1){							//para cada columna del tablero
+			if(i==0){											//si corresponde al marco superior
 				if(aux == 0){
-					bufferTablero[j*2] = '0' + j;
+					bufferTablero[j*2] = '0' + j;				//se introduce caracter del marco
 					aux=1;
 				}else{
-					bufferTablero[j*2+aux] = '|';
+					bufferTablero[j*2+aux] = '|';				//se introduce barra de separación
 					aux=0;
 					j++;
 				}
-			}else if(j==0){
+			}else if(j==0){										//si corresponde al marco lateral izquierdo
 				if(aux % 2 == 0){
-					bufferTablero[i*8*2+j*2+i] = '0' + i;
+					bufferTablero[i*8*2+j*2+i] = '0' + i;		//se introduce caracter del marco
 					aux=1;
 				}else{
-					bufferTablero[i*8*2+j*2+aux+i] = '|';
+					bufferTablero[i*8*2+j*2+aux+i] = '|';		//se introduce barra de separación
 					aux=0;
 					j++;
 				}	
-			}else{
+			}else{												//si se trata del contenido del tablero
 				if(aux == 0){
 					if(salida[i][j] == 0x11){
-						bufferTablero[i*8*2+j*2+i] = 'B';
+						bufferTablero[i*8*2+j*2+i] = 'B';		//se introduce ficha blanca
 					}else if(salida[i][j] == 0x22){
-						bufferTablero[i*8*2+j*2+i] = 'N';
+						bufferTablero[i*8*2+j*2+i] = 'N';		//se introduce ficha negra
 					}else{
-						bufferTablero[i*8*2+j*2+i] = ' ';
+						bufferTablero[i*8*2+j*2+i] = ' ';		//se deja vacia la celda
 					}	
 					aux=1;	
 				}else{
-					bufferTablero[i*8*2+j*2+aux+i] = '|';
+					bufferTablero[i*8*2+j*2+aux+i] = '|';		//se introduce barra de separación
 					aux=0;
 					j++;
 				}
@@ -221,7 +220,7 @@ int tablero_to_array(uint8_t bufferTablero[]){
 		bufferTablero[i*8*2+j*2+i] = '\n';
 		i++;
 	}
-	return i*8*2+i;
+	return i*8*2+i;												//se devuelve la siguiente posicion al ultimo elemento introducido en el vector
 }
 
 
@@ -282,8 +281,6 @@ void conecta_K_visualizar_movimiento_juego(){// se puede llamar a una funcion nu
 	linea_serie_drv_enviar_array(bufferTablero);
 
 }
-
-
 
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -475,13 +472,14 @@ void reiniciar_estadisticas(){
 
 
 //comienzo del juego, inicializa el tablero y muestra mensaje inicial por pantalla
-void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM, uint32_t (*callback_fifo_estadisticas_param)(), void (*callback_fifo_reiniciar_estadisticas_param)()){
+void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callback_gpio_hal_escribir_param)(), uint32_t (*callback_gpio_hal_leer_param)(), int GPIO_JUGAR_ERROR_PARAM, int GPIO_JUGAR_ERROR_BITS_PARAM, int GPIO_HAL_PIN_DIR_OUTPUT_PARAM, uint32_t (*callback_fifo_estadisticas_param)(), void (*callback_fifo_reiniciar_estadisticas_param)()){
 	cuenta = 0;
 	intervalo = 0;
 	GPIO_JUGAR_ERROR = GPIO_JUGAR_ERROR_PARAM;
 	GPIO_JUGAR_ERROR_BITS = GPIO_JUGAR_ERROR_BITS_PARAM;
 	callback_gpio_hal_sentido_param(GPIO_JUGAR_ERROR_PARAM, GPIO_JUGAR_ERROR_BITS_PARAM, GPIO_HAL_PIN_DIR_OUTPUT);
 	callback_gpio_hal_escribir = callback_gpio_hal_escribir_param;
+	callback_gpio_hal_leer = callback_gpio_hal_leer_param;
 	callback_fifo_estadisticas = callback_fifo_estadisticas_param;
 	callback_fifo_reiniciar_estadisticas = callback_fifo_reiniciar_estadisticas_param;
 	tablero_inicializar(&cuadricula);
@@ -570,8 +568,11 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 
 			//si el comando es "END" se finaliza la partida y se muestra por pantalla la pantalla final
 			if((bufferTratarEvento[0] == 'E' && bufferTratarEvento[1] == 'N'&& bufferTratarEvento[2] == 'D')){
-				
-				callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); //revisar pq no siempre hay que limpiarlo
+				//leemos el estado del pin de error
+				if(callback_gpio_hal_leer(GPIO_JUGAR_ERROR,GPIO_JUGAR_ERROR_BITS) == 1){
+					//si el bit de error esta activo se desactiva
+					callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); 
+				}
 				reason = 2;										//se establece el motivo del final de partida
 				t2Procesador = clock_get_us();					//se obtiene el momento del final de la partida
 				mostrar_pantalla_final_juego();					//se muestra la pantalla final
@@ -587,7 +588,11 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 				
 				//se comprueba si la celda esta vacia, es decir, se puede colocar la ficha
 				if (celda_vacia(tablero_leer_celda(&cuadricula, fila -1, columna -1))){
-					callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); //revisar pq no siempre hay que limpiarlo
+					//leemos el estado del pin de error
+					if(callback_gpio_hal_leer(GPIO_JUGAR_ERROR,GPIO_JUGAR_ERROR_BITS) == 1){
+						//si el bit de error esta activo se desactiva
+						callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); 
+					}
 					conecta_K_visualizar_movimiento_juego(); 	//se visualiza el movimiento introducido y el mensaje de cancelacion
 					state = ESCRITURA_COMANDO_CORRECTO;
 					alarma_activar(ev_JUEGO, 3000, 0); 			//alarma para permitir los tres segundos de cancelacion
@@ -605,7 +610,11 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 				state = ESCRITURA_MOSTRAR_ERROR;
 			}
 		}else if(ID_evento == BOTON && auxData == 2){ 			//evento de boton 2 pulsado
-			callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); //revisar pq no siempre hay que limpiarlo
+			//leemos el estado del pin de error
+			if(callback_gpio_hal_leer(GPIO_JUGAR_ERROR,GPIO_JUGAR_ERROR_BITS) == 1){
+				//si el bit de error esta activo se desactiva
+				callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 0); 
+			}
 			uint64_t tiempo_actual;								//se obtiene el tiempo actual (practica 2b)
 			tiempo_actual = clock_get_us();
 			intervalo = tiempo_actual - ultimaPulsacion; 		//se calcula el tiempo desde la ultima pulsacion (practica 2b)
