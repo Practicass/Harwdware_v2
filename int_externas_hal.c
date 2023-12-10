@@ -32,7 +32,7 @@ void eint2_ISR (void) __irq {
 // configura las interrupciones eint1
 void eint1_init ( void (*callback_fifo_encolar_eint1_param)(), uint8_t BOTON_PARAM) {
 
-	VICVectAddr2 = (unsigned long)eint1_ISR;							// Establece la dirección de la rutina de interrupción para eint1 en el vector de interrupción
+	VICVectAddr2 = (unsigned long)eint1_ISR;							// Establece la dirección de la rutina de interrupción para eint1 en el vector de interrupciones
 
 	PINSEL0 = PINSEL0 & 0xcfffffff;										//Configura la función del pin P0.14 como eint1
 	PINSEL0 = PINSEL0 | 0x20000000;						
