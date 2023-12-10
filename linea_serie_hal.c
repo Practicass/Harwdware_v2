@@ -32,7 +32,7 @@ void linea_serie_hal_inicializar(void (*callback_linea_serie_drv_leer_param)(), 
 
 }
 
-//Se desactiva activan las interrupciones THRE y se asigna al registro de transmision el caracter
+//Se activan las interrupciones THRE y se asigna al registro de transmision el caracter
 void linea_serie_hal_escribir(uint8_t caracter){
     U0IER |= 0x2;
     U0THR = caracter;
