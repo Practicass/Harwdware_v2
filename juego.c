@@ -72,6 +72,34 @@ static  state = PAG_PRINCIPAL; // se establece el estado inicial
 //---------------------------------------------------------------------------------------------------------------------
 
 
+//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer se añade los caracteres '\n' y '%'
+void convesor_entero_char(uint32_t num, uint8_t array_digitos[]){
+	int numAux = num;									//realizamos una copia del array para no modificarlo
+	//calculamos la longitud del vector
+	unsigned int longitud = 0;							
+	while (numAux != 0) {
+        numAux /= 10;
+        longitud++;
+    }
+    // Crear un array para almacenar los dígitos
+    numAux = num;
+	array_digitos[longitud] = '\n';						//en la última posicion del vector colocamos el salto de linea y nuestro caracter de fin de buffer
+	array_digitos[longitud+1] = '%';
+    // Separar cada dígito y almacenarlo en el array
+    for (int i = longitud - 1; i >= 0; i--) {			//copiamos cada digito en el array
+        array_digitos[i] = (numAux % 10) + '0';
+        numAux /= 10;
+    }
+	
+}
+
+//muestra el tiempo que tarda en mostrar el tablero, el cual ha sido previamente calculado
+void conecta_K_visualizar_tiempo(uint32_t num){
+	uint8_t array_digitos[100];
+	convesor_entero_char(num,array_digitos);
+	linea_serie_drv_enviar_array(array_digitos);
+}
+
 //calcula el tiempo que tarda en mostrar el tablero (practica 2c)
 void tiempo_visualizar_tablero(uint32_t t2){
 
@@ -94,26 +122,7 @@ int concatenar_array(uint8_t buffer1[], uint8_t buffer2[], int index){
 
 
 
-//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer se añade los caracteres '\n' y '%'
-void convesor_entero_char(uint32_t num, uint8_t array_digitos[]){
-	int numAux = num;									//realizamos una copia del array para no modificarlo
-	//calculamos la longitud del vector
-	unsigned int longitud = 0;							
-	while (numAux != 0) {
-        numAux /= 10;
-        longitud++;
-    }
-    // Crear un array para almacenar los dígitos
-    numAux = num;
-	array_digitos[longitud] = '\n';						//en la última posicion del vector colocamos el salto de linea y nuestro caracter de fin de buffer
-	array_digitos[longitud+1] = '%';
-    // Separar cada dígito y almacenarlo en el array
-    for (int i = longitud - 1; i >= 0; i--) {			//copiamos cada digito en el array
-        array_digitos[i] = (numAux % 10) + '0';
-        numAux /= 10;
-    }
-	
-}
+
 
 //funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer no se añade los caracteres '\n' y '%' y devuelve la longitud del numero
 int convesor_entero_char_2(uint32_t num, uint8_t array_digitos[], int indice){
@@ -164,12 +173,7 @@ int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
 	return longitud+1;									//devuelve la longitud del array
 }
 
-//muestra el tiempo que tarda en mostrar el tablero, el cual ha sido previamente calculado
-void conecta_K_visualizar_tiempo(uint32_t num){
-	uint8_t array_digitos[100];
-	convesor_entero_char(num,array_digitos);
-	linea_serie_drv_enviar_array(array_digitos);
-}
+
 
 
 //---------------------------------------------------------------------------------------------------------------------

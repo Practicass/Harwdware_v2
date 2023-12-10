@@ -47,14 +47,14 @@ uint64_t temporizador_hal_leer(){
 
 //Se detiene el Timer Counter y Prescale Counter y devuelve el tiempo en ticks transcurrido desde el ultimo temporizador_hal_empezar
 uint64_t temporizador_hal_parar(){
-	T1TCR = 3;//poner aqui 2 igual?	
     T1TCR = 0;
     return temporizador_hal_leer();
 }
 
-//Habilita las interrupciones TIMER1 y se reinicia Timer Counter y Prescale Counter
+//Habilita las interrupciones TIMER1 y se reinicia y habilita el Timer Counter y Prescale Counter
 void temporizador_hal_empezar(){
-			T1TCR = 1;
+	T1TCR = 2;
+	T1TCR = 1;
     VICIntEnable = VICIntEnable | 0x20;			
 
 }
