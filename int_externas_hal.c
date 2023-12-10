@@ -7,97 +7,75 @@ static void (*callback_fifo_encolar_eint2)();		//puntero a la funcion que encola
 static uint8_t BOTON1;								
 static uint8_t BOTON2;								
 
-//// variable para comprobar que se hacen las interrupciones que deber?an hacerse
-//static volatile unsigned int eint1_count = 0;
-//// variable que se activa al detectar una nueva pulsaci?n
-//static volatile int eint1_nueva_pulsacion = 0;
-//// variable para comprobar que se hacen las interrupciones que deber?an hacerse
-//static volatile unsigned int eint2_count = 0;
-//// variable que se activa al detectar una nueva pulsaci?n
-//static volatile int eint2_nueva_pulsacion = 0;
 
+//rutina de interrupción que encola el evento BOTON en la cola fifo, 
+//desactiva las interrupciones eint1 y limpia la interrupción
 void eint1_ISR (void) __irq {
-	//eint1_count++;
     callback_fifo_encolar_eint1(BOTON1, 1);        
-	//eint1_nueva_pulsacion = 1;
     VICIntEnable = VICIntEnable & 0xfff7fff;
     VICIntEnClr = 0x00008000;  
 	VICVectAddr = 0;
 		
 }
-
+//rutina de interrupción que encola el evento BOTON en la cola fifo, 
+//desactiva las interrupciones eint2 y limpia la interrupción
 void eint2_ISR (void) __irq {
-	//eint2_count++;
+
     callback_fifo_encolar_eint2(BOTON2, 2);        
-	//eint2_nueva_pulsacion = 1;
     VICIntEnable = VICIntEnable & 0xfffeffff;
-	  VICIntEnClr = 0x00010000;
-		VICVectAddr = 0;
+	VICIntEnClr = 0x00010000;
+	VICVectAddr = 0;
 }
 
 
-
+//función que define las estructuras de datos necesarias para su correcto funcionamiento y 
+// configura las interrupciones eint1
 void eint1_init ( void (*callback_fifo_encolar_eint1_param)(), uint8_t BOTON_PARAM) {
-// NOTA: seg?n el manual se puede configurar c?mo se activan las interrupciones: por flanco o nivel, alta o baja. 
-// Se usar?an los registros EXTMODE y EXTPOLAR. 
-// Sin embargo parece que el simulador los ignora y no aparecen en la ventana de ocnfiguraci?n de EXT Interrupts
-// configure EXTINT0 active if a rising-edge is detected
-//	EXTMODE 	=	1; //1 edge, 0 level
-//	EXTPOLAR	=	1; // 1 high, rising-edge; 0 low, falling-edge
-//  prueba = EXTMODE;
-	//eint1_nueva_pulsacion = 0;
-	//eint1_count = 0;   	
-	// configuration of the IRQ slot number 2 of the VIC for EXTINT0
-	VICVectAddr2 = (unsigned long)eint1_ISR;          // set interrupt vector in 0
-    // 0x20 bit 5 enables vectored IRQs. 
-		// 15 is the number of the interrupt assigned. Number 15 is the EINT0 (see table 40 of the LPC2105 user manual  
-	PINSEL0 		= PINSEL0 & 0xcfffffff;	//Sets bits 0 and 1 to 0
-	PINSEL0 		= PINSEL0 | 0x20000000;					//Enable the EXTINT0 interrupt
-	VICVectCntl2 = 0x20 | 15;                   
-    VICIntEnable = VICIntEnable | 0x00008000;                  // Enable EXTINT0 Interrupt
+
+	VICVectAddr2 = (unsigned long)eint1_ISR;							// Establece la dirección de la rutina de interrupción para eint1 en el vector de interrupción
+
+	PINSEL0 = PINSEL0 & 0xcfffffff;										//Configura la función del pin P0.14 como eint1
+	PINSEL0 = PINSEL0 | 0x20000000;						
+	VICVectCntl2 = 0x20 | 15;                   						//Configura la interrupcion, 0x20 habilita las interrupciones vectorizadas y 15 es el numero de interrupción eint1
+    VICIntEnable = VICIntEnable | 0x00008000;                  			//Habilita la interrupción eint1
 	callback_fifo_encolar_eint1 = callback_fifo_encolar_eint1_param;
 	BOTON1 = BOTON_PARAM;
 }
 
+//función que define las estructuras de datos necesarias para su correcto funcionamiento y 
+// configura las interrupciones eint2
 void eint2_init (void (*callback_fifo_encolar_eint2_param)(), uint8_t BOTON_PARAM) {
-// NOTA: seg?n el manual se puede configurar c?mo se activan las interrupciones: por flanco o nivel, alta o baja. 
-// Se usar?an los registros EXTMODE y EXTPOLAR. 
-// Sin embargo parece que el simulador los ignora y no aparecen en la ventana de ocnfiguraci?n de EXT Interrupts
-// configure EXTINT0 active if a rising-edge is detected
-//	EXTMODE 	=	1; //1 edge, 0 level
-//	EXTPOLAR	=	1; // 1 high, rising-edge; 0 low, falling-edge
-//  prueba = EXTMODE;
-	//eint2_nueva_pulsacion = 0;
-	//eint2_count = 0;  	
-	// configuration of the IRQ slot number 2 of the VIC for EXTINT0
-	VICVectAddr3 = (unsigned long)eint2_ISR;          // set interrupt vector in 0
-    // 0x20 bit 5 enables vectored IRQs. 
-		// 16 is the number of the interrupt assigned. Number 16 is the EINT0 (see table 40 of the LPC2105 user manual  
-	PINSEL0 		= PINSEL0 & 0x3fffffff;	//Sets bits 0 and 1 to 0
-	PINSEL0 		= PINSEL0 | 0x80000000;					//Enable the EXTINT0 interrupt
-	VICVectCntl3 = 0x20 | 16;                   
-  VICIntEnable = VICIntEnable | 0x00010000;                  // Enable EXTINT0 Interrupt
+
+	VICVectAddr3 = (unsigned long)eint2_ISR;							//Establece la dirección de la rutina de interrupción para eint2 en el vector de interrupción
+
+	PINSEL0 		= PINSEL0 & 0x3fffffff;								//Configura la función del pin P0.15 como eint2
+	PINSEL0 		= PINSEL0 | 0x80000000;	
+	VICVectCntl3 = 0x20 | 16;               							//Configura la interrupcion, 0x20 habilita las interrupciones vectorizadas y 16 es el numero de interrupción eint2
+  	VICIntEnable = VICIntEnable | 0x00010000; 							//Habilita la interrupción eint2
   	callback_fifo_encolar_eint2 = callback_fifo_encolar_eint2_param;
-		BOTON2 = BOTON_PARAM;
+	BOTON2 = BOTON_PARAM;
 }
 
-
+//Habilita la interrupcion eint1
 void eint1_enable(void){
-	VICIntEnable = VICIntEnable | 0x00008000;  
+	VICIntEnable = VICIntEnable | 0x00008000;  		
 }
+//Habilita la interrupcion eint2
 void eint2_enable(void){
-	VICIntEnable = VICIntEnable | 0x00010000;  
+	VICIntEnable = VICIntEnable | 0x00010000;  		
 }
 
+//Comprueba si la interrupción eint1 sigue activa
 unsigned int eint1_hold(void){
-	EXTINT = EXTINT | ~2;
-    if ((EXTINT & 2) == 2) {
+	EXTINT = EXTINT | ~2;			//Se guarda la flag de interrupción de eint1, estará activa si en el bit 1 hay un 1
+    if ((EXTINT & 2) == 2) {		
         return 1;
     }
     else return 0;
 }
 
-unsigned int eint2_hold(void){
+//Comprueba si la interrupción eint2 sigue activa
+unsigned int eint2_hold(void){		//Se guarda la flag de interrupción de eint1, estará activa si en el bit 2 hay un 1
 	EXTINT = EXTINT | ~4;
     if ((EXTINT & 4) == 4) {
         return 1;
