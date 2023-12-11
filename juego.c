@@ -59,7 +59,7 @@ enum ESTADOS{
 	ESCRITURA_TABLERO_FIN = 10,							//Espera a que se escriba el tablero ganador y muestra el mensaje de fin de partida, la información sobre la partida y un mensaje para volver a jugar 
 	}
 
-static  state = PAG_PRINCIPAL; // se establece el estado inicial
+static  state = PAG_PRINCIPAL; 							// se establece el estado inicial
 
 
 //---------------------------------------------------------------------------------------------------------------------
