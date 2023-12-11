@@ -44,19 +44,19 @@ static uint32_t numHumano = 0; 							//numero de veces que los jugadores introd
 
 // definicion de los estados
 enum ESTADOS{ 
-	PAG_PRINCIPAL = 0,
-    ESCRITURA_PAG_PRINCIPAL = 1,
-    WAIT_INICIO_PARTIDA = 2,
-    ESCRITURA_MOSTRAR_TABLERO = 3,
-    WAIT_COMANDO = 4,
-	ESCRITURA_MOSTRAR_ERROR = 5,
-	ESCRITURA_MOSTRAR_FIN = 6,
-	COMANDO_CORRECTO = 7,
-	ESCRITURA_COMANDO_CORRECTO = 8,
-	WAIT_CANCELAR = 9,
-	CANCELADO = 10,
-	REALIZAR_COMANDO = 11,
-	ESCRITURA_TABLERO_FIN = 12,
+	PAG_PRINCIPAL = 0,									//Se muestra por linea serie información sobre el juego y cómo jugarlo
+    ESCRITURA_PAG_PRINCIPAL = 1,						//Se espera a que se haya escrito la información de PAG_PRINCIPAL
+    WAIT_INICIO_PARTIDA = 2,							//Se espera a que se pulse un boton o introduzca el comando $NEW! y se escribe el tablero inicial
+    ESCRITURA_MOSTRAR_TABLERO = 3,						//Se espera a que se haya escrito el tablero
+    WAIT_COMANDO = 4,									//Se espera a que se introduzca un comando, si es invalido se tratará y se mostrará un mensaje de error,
+														//si es valido se mostrará una previsualización del tablero con la jugada introducida. 
+														//Si se introduce el comando $END! o se pulsa el  boton 2 se muestra información sobre la partida y se termina
+	ESCRITURA_MOSTRAR_ERROR = 5,						//Se espera a que se haya escrito el mensaje de error de WAIT_COMANDO
+	ESCRITURA_MOSTRAR_FIN = 6,							//Se espera a que se haya escrito el mensaje de fin de partida
+	ESCRITURA_COMANDO_CORRECTO = 7,						//Se espera a que se haya escrito el tablero con la previsualización de la jugada y programa la alarma de cancelación de la jugada
+	WAIT_CANCELAR = 8,									//Se espera durante 3 segundos a que se pulse el boton 1 para cancelar la jugada, sino se confirmará la jugada, mostrará el tablero y comprobara si se existe una jugada ganadora
+	CANCELADO = 9,										//Se espera a que se haya escrito el mensaje de movimiento cancelado
+	ESCRITURA_TABLERO_FIN = 10,							//Espera a que se escriba el tablero ganador y muestra el mensaje de fin de partida, la información sobre la partida y un mensaje para volver a jugar 
 	}
 
 static  state = PAG_PRINCIPAL; // se establece el estado inicial
@@ -607,7 +607,7 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 					}
 					conecta_K_visualizar_movimiento_juego(); 	//se visualiza el movimiento introducido y el mensaje de cancelacion
 					state = ESCRITURA_COMANDO_CORRECTO;
-					alarma_activar(ev_JUEGO, 3000, 0); 			//alarma para permitir los tres segundos de cancelacion
+					
 				}else{
 					//celda ocupada y se muestra el led de error
 					callback_gpio_hal_escribir(GPIO_JUGAR_ERROR, GPIO_JUGAR_ERROR_BITS, 1);
@@ -639,7 +639,9 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 		}
 	}else if (state == ESCRITURA_COMANDO_CORRECTO){ 			//estado de espera a que se escriba todo el buffer por linea serie
 		if(ID_evento == ev_TX_SERIE){ 							// evento que indica finalización de la escritura y se avanza al siguiente estado
+			alarma_activar(ev_JUEGO, 3000, 0); 					//alarma para permitir los tres segundos de cancelacion
 			state = WAIT_CANCELAR;
+
 		}
 	}else if (state == WAIT_CANCELAR){
 		if(ID_evento == ev_JUEGO){ 								//evento de jugada valida y no cancelada
