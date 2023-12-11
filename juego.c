@@ -19,6 +19,8 @@ static uint32_t turnoEmpieza = 1; 						//numero del jugador que empieza la sigu
 static uint8_t fila = 0;								//valor de la fila introducida por un jugador
 static uint8_t columna = 0;								//valor de la columna introducida por un jugador
 static uint8_t reason = 0; 								//causa del final de la partida: 0 -> victoria, 1 -> cancelada mediante boton, 2 -> comando end introducido
+int indexFinal = 0;
+uint8_t bufferMsgFinal[600];
 
 //variables para calcular el tiempo del procesador en una partida
 static uint32_t t1Procesador; 							// tiempo de comienzo de la partida
@@ -72,7 +74,7 @@ static  state = PAG_PRINCIPAL; // se establece el estado inicial
 //---------------------------------------------------------------------------------------------------------------------
 
 
-//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer se añade los caracteres '\n' y '%'
+//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer se añade los caracteres '\n' y '\0'
 void convesor_entero_char(uint32_t num, uint8_t array_digitos[]){
 	int numAux = num;									//realizamos una copia del array para no modificarlo
 	//calculamos la longitud del vector
@@ -84,7 +86,7 @@ void convesor_entero_char(uint32_t num, uint8_t array_digitos[]){
     // Crear un array para almacenar los dígitos
     numAux = num;
 	array_digitos[longitud] = '\n';						//en la última posicion del vector colocamos el salto de linea y nuestro caracter de fin de buffer
-	array_digitos[longitud+1] = '%';
+	array_digitos[longitud+1] = '\0';
     // Separar cada dígito y almacenarlo en el array
     for (int i = longitud - 1; i >= 0; i--) {			//copiamos cada digito en el array
         array_digitos[i] = (numAux % 10) + '0';
@@ -112,7 +114,7 @@ void tiempo_visualizar_tablero(uint32_t t2){
 //Devuelve el indice de la última compononete + 1 que ha sido rellenada
 int concatenar_array(uint8_t buffer1[], uint8_t buffer2[], int index){
 	int j=0;											//variable auxiliar del bucle
-	while(buffer2[j] != '%'){							//mientras el carcter es distinto al caracter de finalización del buffer '%'
+	while(buffer2[j] != '\0'){							//mientras el carcter es distinto al caracter de finalización del buffer '\0'
 		buffer1[index+j] = buffer2[j];					//se copia la componente j en la componente correpondiente en el buffer1
 		j++;
 	}
@@ -124,7 +126,7 @@ int concatenar_array(uint8_t buffer1[], uint8_t buffer2[], int index){
 
 
 
-//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer no se añade los caracteres '\n' y '%' y devuelve la longitud del numero
+//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer no se añade los caracteres '\n' y '\0' y devuelve la longitud del numero
 int convesor_entero_char_2(uint32_t num, uint8_t array_digitos[], int indice){
 	int numAux = num;									//realizamos una copia del array para no modificarlo
 	//calculamos la longitud del vector
@@ -145,7 +147,7 @@ int convesor_entero_char_2(uint32_t num, uint8_t array_digitos[], int indice){
 	return longitud;									//devuelve la longitud del número
 }
 
-//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer se añade el caracterer '%' 
+//funcion que dado un entero lo convierte en char para permitir su escritura por linea serie, al final del buffer se añade el caracterer '\0' 
 //y si num = 0 devuelve el caracter 0. Ademas devuelve la longitud del array
 int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
 	int numAux = num;									//realizamos una copia del array para no modificarlo
@@ -169,7 +171,7 @@ int convesor_entero_char_3(uint32_t num, uint8_t array_digitos[], int indice){
         array_digitos[i] = (numAux % 10) + '0';
         numAux /= 10;
     }
-	array_digitos[longitud] = '%';
+	array_digitos[longitud] = '\0';
 	return longitud+1;									//devuelve la longitud del array
 }
 
@@ -241,12 +243,12 @@ void conecta_K_visualizar_tablero_ganador(){
 	conecta_K_visualizar_tablero(&cuadricula, salida);	//se visualiza el tablero
 	
 	int ind = tablero_to_array(bufferTablero);
-	uint8_t bufferAux[42] = "Ganador:  \n***************************\n\n%";
+	uint8_t bufferAux[42] = "Ganador:  \n***************************\n\n\0";
 	bufferAux[9] = turno +'0';							//se introduce el numero del jugador ganador
 	
 	ind = concatenar_array(bufferTablero, bufferAux, ind);
 
-	bufferTablero[ind] = '%';							//se introduce el caracter de fin de buffer
+	bufferTablero[ind] = '\0';							//se introduce el caracter de fin de buffer
 	linea_serie_drv_enviar_array(bufferTablero);
 }
 
@@ -260,10 +262,10 @@ void conecta_K_visualizar_tablero_juego(){
 	conecta_K_visualizar_tablero(&cuadricula, salida);	//se visualiza el tablero
 	
 	int ind = tablero_to_array(bufferTablero);
-	uint8_t bufferAux[40] = "Turno:  \n***************************\n\n%";
+	uint8_t bufferAux[40] = "Turno:  \n***************************\n\n\0";
 	bufferAux[7] = turno +'0';							//se introduce el numero del jugador que le toca mover
 	ind = concatenar_array(bufferTablero, bufferAux, ind);
-	bufferTablero[ind] = '%';							//se introduce el caracter de fin de buffer	
+	bufferTablero[ind] = '\0';							//se introduce el caracter de fin de buffer	
 	linea_serie_drv_enviar_array(bufferTablero);
 }
 
@@ -283,9 +285,9 @@ void conecta_K_visualizar_movimiento_juego(){// se puede llamar a una funcion nu
 		bufferTablero[fila*8*2+columna*2+fila] = 'N' ;
 	}
 	//se muestra el mensaje de movimiento cancelado
-	uint8_t bufferAux[65] = "PULSA EL BOTON 1 PARA CANCELAR\n***************************\n\n%";
+	uint8_t bufferAux[65] = "PULSA EL BOTON 1 PARA CANCELAR\n***************************\n\n\0";
 	ind = concatenar_array(bufferTablero, bufferAux, ind);
-	bufferTablero[ind] = '%';							//se introduce el caracter de fin de buffer	
+	bufferTablero[ind] = '\0';							//se introduce el caracter de fin de buffer	
 	linea_serie_drv_enviar_array(bufferTablero);
 
 }
@@ -296,131 +298,129 @@ void conecta_K_visualizar_movimiento_juego(){// se puede llamar a una funcion nu
 //---------------------------------------------------------------------------------------------------------------------
 
 
-//introduce en el buffer el titulo de partida fin y devuelve el nuevo indice del buffer 
-int mostrar_titulo_final_juego(uint8_t buffer[], int index){ //0 -> victoria, 1 -> cancel, 2 -> end
-	int ind;
+//introduce en el buffer el titulo de partida fin y actualiza el nuevo indice del buffer 
+void mostrar_titulo_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
+	
 	//depende de la razon que ha acabado la partida se muestra un mensaje u otro
 	if (reason == 1 || reason == 2){
-		uint8_t bufferMsgFin[38] = "FIN DE LA PARTIDA\nPARTIDA CANCELADA\n%";
-		ind = concatenar_array(buffer,bufferMsgFin,index);
+		uint8_t bufferMsgFinJuego[38] = "FIN DE LA PARTIDA\nPARTIDA CANCELADA\n\0";
+		indexFinal = concatenar_array(bufferMsgFinal,bufferMsgFinJuego,indexFinal);
 	}else if( reason == 0){
-		uint8_t bufferMsgFin[39] = "FIN DE LA PARTIDA\nPARTIDA FINALIZADA\n%";
-		ind = concatenar_array(buffer,bufferMsgFin,index);
+		uint8_t bufferMsgFinJuego[39] = "FIN DE LA PARTIDA\nPARTIDA FINALIZADA\n\0";
+		indexFinal = concatenar_array(bufferMsgFinal,bufferMsgFinJuego,indexFinal);
 
 	}
-	return ind;											//devuelve el nuevo indice del buffer
+	
 	
 }
 
-//introduce en el buffer el motivo de finalización de partida y devuelve el nuevo indice del buffer 
-int mostrar_causa(uint8_t buffer[], int index){
-	int ind;
+//introduce en el buffer el motivo de finalización de partida y actualiza el nuevo indice del buffer 
+void mostrar_causa(){
+	
 	//depende de la razon que ha acabado la partida se muestra un mensaje u otro
 	if(reason == 0){
-		uint8_t bufferMsg[32] = "CAUSA: VICTORIA DEL JUGADOR  \n%";
+		uint8_t bufferMsg[32] = "CAUSA: VICTORIA DEL JUGADOR  \n\0";
 		bufferMsg[28] = turno +'0';						//se introduce el numero del jugador ganador
-		ind = concatenar_array(buffer,bufferMsg,index);
+		indexFinal = concatenar_array(bufferMsgFinal,bufferMsg,indexFinal);
 
 	}else if(reason == 1){
-		uint8_t bufferMsg[25] = "CAUSA: BOTON 2 PULSADO\n%";
-		ind = concatenar_array(buffer,bufferMsg,index);
+		uint8_t bufferMsg[25] = "CAUSA: BOTON 2 PULSADO\n\0";
+		indexFinal = concatenar_array(bufferMsgFinal,bufferMsg,indexFinal);
 
 	}else if(reason == 2) {
-		uint8_t bufferMsg[33] = "CAUSA: COMANDO END INTRODUCIDO\n%";
-		ind = concatenar_array(buffer,bufferMsg,index);
+		uint8_t bufferMsg[33] = "CAUSA: COMANDO END INTRODUCIDO\n\0";
+		indexFinal = concatenar_array(bufferMsgFinal,bufferMsg,indexFinal);
 	
 	}
-	return ind;											//devuelve el nuevo indice del buffer
+	
 
 	
 }
 
-//introduce en el buffer el tiempo total del uso del procesador y devuelve el nuevo indice del buffer 
-int mostrar_tiempo_procesador(uint8_t buffer[], int index){
+//introduce en el buffer el tiempo total del uso del procesador y actualiza el nuevo indice del buffer 
+void mostrar_tiempo_procesador(){
 	uint32_t tTotalProcesador = t2Procesador -t1Procesador;			//se calcula el tiempo total de uso del procesador
-	uint8_t bufferMsg[32] = "Tiempo de uso del procesador: %";		
-	int ind = concatenar_array(buffer, bufferMsg, index);
+	uint8_t bufferMsg[32] = "Tiempo de uso del procesador: \0";		
+	indexFinal = concatenar_array(bufferMsgFinal, bufferMsg, indexFinal);
 	int aux = convesor_entero_char_3(tTotalProcesador, bufferMsg, 0);
-	ind = concatenar_array(buffer, bufferMsg, ind);
-	uint8_t bufferAux[6] = " us\n%";								//se introduce las unidades, el salto de linea y el caracter de fin de buffer
-	ind = concatenar_array(buffer,bufferAux,ind);
-	return ind;														//devuelve el nuevo indice del buffer
+	indexFinal = concatenar_array(bufferMsgFinal, bufferMsg, indexFinal);
+	uint8_t bufferAux[6] = " us\n\0";								//se introduce las unidades, el salto de linea y el caracter de fin de buffer
+	indexFinal = concatenar_array(bufferMsgFinal,bufferAux,indexFinal);
+															
 }
 
-//introduce en el buffer el tiempo total y medio de computo de conecta_k_hay_linea y devuelve el nuevo indice del buffer 
-int mostrar_tiempo_hay_linea(uint8_t buffer[], int index){
-	uint8_t bufferMsg[100] = "Tiempo de computo de conecta_k_hay_linea\nTotal: %";
-	int ind = concatenar_array(buffer, bufferMsg, index);
+//introduce en el buffer el tiempo total y medio de computo de conecta_k_hay_linea y actualiza el nuevo indice del buffer 
+void mostrar_tiempo_hay_linea(){
+	uint8_t bufferMsg[100] = "Tiempo de computo de conecta_k_hay_linea\nTotal: \0";
+	indexFinal = concatenar_array(bufferMsgFinal, bufferMsg, indexFinal);
 	int aux = convesor_entero_char_3(sumHayLinea, bufferMsg, 0);
-	ind = concatenar_array(buffer, bufferMsg, ind);
-	uint8_t bufferAux[100] = "  Media: %";
-	ind = concatenar_array(buffer, bufferAux, ind);
+	indexFinal = concatenar_array(bufferMsgFinal, bufferMsg, indexFinal);
+	uint8_t bufferAux[100] = "  Media: \0";
+	indexFinal = concatenar_array(bufferMsgFinal, bufferAux, indexFinal);
 	int aux2 = convesor_entero_char_3(sumHayLinea/numHayLinea, bufferMsg, 0);
-	bufferMsg[aux2] = '%';								//se introduce el caracter de fin de buffer
-	ind = concatenar_array(buffer,bufferMsg,ind);
-	return ind;											//devuelve el nuevo indice del buffer
+	bufferMsg[aux2] = '\0';								//se introduce el caracter de fin de buffer
+	indexFinal = concatenar_array(bufferMsgFinal,bufferMsg,indexFinal);
 
 }
 
-//introduce en el buffer el tiempo total y medio que tardan los jugadores en introucir una jugada y devuelve el nuevo indice del buffer 
-int mostrar_tiempo_humano(uint8_t buffer[], int index){
+//introduce en el buffer el tiempo total y medio que tardan los jugadores en introucir una jugada y actualiza el nuevo indice del buffer 
+void mostrar_tiempo_humano(){
 	
-	uint8_t bufferMsg[100] = "\nTiempo del humano en pensar\nTotal: %";
-	int ind = concatenar_array(buffer, bufferMsg, index);
+	uint8_t bufferMsg[100] = "\nTiempo del humano en pensar\nTotal: \0";
+	indexFinal = concatenar_array(bufferMsgFinal, bufferMsg, indexFinal);
 	int aux = convesor_entero_char_3(sumHumano, bufferMsg, 0);
-	ind = concatenar_array(buffer, bufferMsg, ind);
-	uint8_t bufferAux[100] = "  Media: %";
-	ind = concatenar_array(buffer, bufferAux, ind);
+	indexFinal = concatenar_array(bufferMsgFinal, bufferMsg, indexFinal);
+	uint8_t bufferAux[100] = "  Media: \0";
+	indexFinal = concatenar_array(bufferMsgFinal, bufferAux, indexFinal);
 	int aux2 = convesor_entero_char_3(sumHumano/numHumano, bufferMsg, 0);
-	bufferMsg[aux2] = '%';								//se introduce el caracter de fin de buffer
-	ind = concatenar_array(buffer,bufferMsg,ind);
-	return ind;											//devuelve el nuevo indice del buffer
+	bufferMsg[aux2] = '\0';								//se introduce el caracter de fin de buffer
+	indexFinal = concatenar_array(bufferMsgFinal,bufferMsg,indexFinal);
 }
 
 
 //muestra el numero total de eventos encolados y el numero de cada tipo de evento de cada partida y devuelve el nuevo indice del buffer 
-int mostrar_estadisticas(uint8_t buffer[], int index2){
+void mostrar_estadisticas(){
 	
 	//array con los tipos de eventos que se van a mostrar por pantalla
-	uint8_t bufferMensajes[NUMEVENTOS][25] = {"\nTOTAL: %","\nTIMER: %", "\nALARMA_OVERFLOW: %", "\nBOTON: %", "\nBOTON_EINT1_ALARM: %", "\nBOTON_EINT2_ALARM: %", "\nDEEP_SLEEP: %", "\nev_LATIDO: %", "\nev_VISUALIZAR_HELLO: %", 
-	 "\nev_RX_SERIE: %", "\nev_TX_SERIE: %",  "\nev_JUEGO: %"};
+	uint8_t bufferMensajes[NUMEVENTOS][25] = {"\nTOTAL: \0","\nTIMER: \0", "\nALARMA_OVERFLOW: \0", "\nBOTON: \0", "\nBOTON_EINT1_ALARM: \0", "\nBOTON_EINT2_ALARM: \0", "\nDEEP_SLEEP: \0", "\nev_LATIDO: \0", "\nev_VISUALIZAR_HELLO: \0", 
+	 "\nev_RX_SERIE: \0", "\nev_TX_SERIE: \0",  "\nev_JUEGO: \0"};
 	
-	int index = 0;
+	//int index = 0;
 	uint8_t bufferEstadistica[100];
 	
 	uint32_t total_eventos = callback_fifo_estadisticas(VOID);
-	index = concatenar_array(buffer, bufferMensajes[0], index2);
+	indexFinal = concatenar_array(bufferMsgFinal, bufferMensajes[0], indexFinal);
 	convesor_entero_char_3((callback_fifo_estadisticas(0)), bufferEstadistica, 0); 
-	index = concatenar_array(buffer, bufferEstadistica, index);
+	indexFinal = concatenar_array(bufferMsgFinal, bufferEstadistica, indexFinal);
 	
 	//se recorre el array de mensajes y se introduce en el buffer el numero de cada tipo de evento
 	for(int i=1; i<NUMEVENTOS; i++){
-		index = concatenar_array(buffer, bufferMensajes[i], index);
+		indexFinal = concatenar_array(bufferMsgFinal, bufferMensajes[i], indexFinal);
 		convesor_entero_char_3((callback_fifo_estadisticas(i)), bufferEstadistica, 0); 
-		index = concatenar_array(buffer, bufferEstadistica, index);
+		indexFinal = concatenar_array(bufferMsgFinal, bufferEstadistica, indexFinal);
 		
 	}
-	buffer[index] = '\n';
+	bufferMsgFinal[indexFinal] = '\n';
 	//bufferMsg[index+1] = '%';
 	//int ind = concatenar_array(buffer,bufferMsg,0);
-	return index+1;											//devuelve el nuevo indice del buffer
+	indexFinal += 1;
 }
 
 
 
 //introduce en el buffer el mensaje con las indicaciones para empezar una nueva partida y devuelve el nuevo indice del buffer 
-int mostrar_volver_a_jugar(uint8_t buffer[], int index){
-	uint8_t bufferMsg[120] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n%";
-	int ind = concatenar_array(buffer,bufferMsg,index);
-	buffer[ind] = '%';									//se introduce el caracter de fin de buffer
-	return ind+1;										//devuelve el nuevo indice del buffer
+void mostrar_volver_a_jugar(){
+	uint8_t bufferMsg[120] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n\0";
+	indexFinal = concatenar_array(bufferMsgFinal,bufferMsg,indexFinal);
+	bufferMsgFinal[indexFinal] = '\0';									//se introduce el caracter de fin de buffer
+	indexFinal +=  1;										//devuelve el nuevo indice del buffer
 
 	
 }
 
 //muestra por linea serie el mensaje de movimiento cancelado por un jugador
 void mostrar_movimiento_cancelado(){
-	uint8_t bufferMsg[22] = "MOVIMIENTO CANCELADO\n%";
+	uint8_t bufferMsg[22] = "MOVIMIENTO CANCELADO\n\0";
 	linea_serie_drv_enviar_array(bufferMsg);
 }
 
@@ -429,10 +429,10 @@ void mostrar_movimiento_cancelado(){
 void mostrar_error_juego(int razon){ 
 	//depende del tipo de error se muestra un mensaje u otro
 	if(razon == 0){
-		uint8_t bufferMsg[100] = "*****************************\nCOMANDO ERRONEO\n*****************************\n\n%";
+		uint8_t bufferMsg[100] = "*****************************\nCOMANDO ERRONEO\n*****************************\n\n\0";
 		linea_serie_drv_enviar_array(bufferMsg);
 	}else if(razon == 1){
-		uint8_t bufferMsg[100] = "*****************************\nCOLUMNA INVALIDA\n*****************************\n\n%";
+		uint8_t bufferMsg[100] = "*****************************\nCOLUMNA INVALIDA\n*****************************\n\n\0";
 		linea_serie_drv_enviar_array(bufferMsg);
 	}
 	
@@ -442,18 +442,18 @@ void mostrar_error_juego(int razon){
 // total y medio en computo de conecta_k_hay_linea, tiempo total y media de tiempo que al humano le cuesta pensar la jugada 
 // y el total de eventos encolados en la cola de eventos.
 void mostrar_pantalla_final_juego(){ //0 -> victoria, 1 -> cancel, 2 -> end
-	uint8_t bufferMsgFinal[600];
+	
 	//uint8_t bufferMsgAux[300];
-	int index = 0;
+	indexFinal = 0;
 	//introducimos en el bufferMsgFinal el texto a imprimir en pantalla
-	index = mostrar_titulo_final_juego(bufferMsgFinal, index);
-	index = mostrar_causa(bufferMsgFinal, index);
-	index = mostrar_tiempo_procesador(bufferMsgFinal, index);
-	index = mostrar_tiempo_hay_linea(bufferMsgFinal, index);
-	index = mostrar_tiempo_humano(bufferMsgFinal, index);
-	index = mostrar_estadisticas(bufferMsgFinal, index);
-	index = mostrar_volver_a_jugar(bufferMsgFinal, index);
-	bufferMsgFinal[index] = '%';						//se coloca el caracter de final de buffer
+	mostrar_titulo_final_juego();
+	mostrar_causa();
+	mostrar_tiempo_procesador();
+	mostrar_tiempo_hay_linea();
+	mostrar_tiempo_humano();
+	mostrar_estadisticas();
+	mostrar_volver_a_jugar();
+	bufferMsgFinal[indexFinal] = '\0';						//se coloca el caracter de final de buffer
 	linea_serie_drv_enviar_array(bufferMsgFinal);
 
 }
@@ -495,7 +495,7 @@ void juego_inicializar(void (*callback_gpio_hal_sentido_param)(), void (*callbac
 	callback_fifo_estadisticas = callback_fifo_estadisticas_param;
 	callback_fifo_reiniciar_estadisticas = callback_fifo_reiniciar_estadisticas_param;
 	tablero_inicializar(&cuadricula);					//inicalizamos el tablero
-	uint8_t bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n%";
+	uint8_t bufferMsgIni[] = "****************************\n\tCONECTA K\nPULSE UN BOTON PARA INICIAR\nO ESCRIBA EL COMANDO $NEW!\nPARA REALIZAR UNA JUGADA\nDEBE INTRODUCIR EL COMANDO ($#-#!)\nPARA FINALIZAR LA PARTIDA\nPULSE EL BOTON 2 O\nINTRODUZCA EL COMANDO $END!\n****************************\n\n\0";
 	state = ESCRITURA_PAG_PRINCIPAL;
 	linea_serie_drv_enviar_array(bufferMsgIni);			
 
@@ -519,7 +519,7 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			bufferTratarEvento[1] = (auxData >> 8) & 0xFF;		//segundo caracter
 			bufferTratarEvento[2] = (auxData) & 0xFF;			//tercero caracter
 			bufferTratarEvento[3] = '\n';						//caracter salto de linea
-			bufferTratarEvento[4] = '%';						//caracter que utilizamos como fin de buffer
+			bufferTratarEvento[4] = '\0';						//caracter que utilizamos como fin de buffer
 			
 			if((bufferTratarEvento[0] == 'N' && bufferTratarEvento[1] == 'E'&& bufferTratarEvento[2] == 'W')){
 				//comienza una nueva partida
@@ -576,7 +576,7 @@ void juego_tratar_evento(EVENTO_T ID_evento, uint32_t auxData){
 			bufferTratarEvento[1] = (auxData >> 8) & 0xFF;		//segundo caracter
 			bufferTratarEvento[2] = (auxData) & 0xFF;			//tercer caracter
 			bufferTratarEvento[3] = '\n';						//caracter salto de linea
-			bufferTratarEvento[4] = '%';						//caracter que utilizamos como fin de buffer
+			bufferTratarEvento[4] = '\0';						//caracter que utilizamos como fin de buffer
 
 			//si el comando es "END" se finaliza la partida y se muestra por pantalla la pantalla final
 			if((bufferTratarEvento[0] == 'E' && bufferTratarEvento[1] == 'N'&& bufferTratarEvento[2] == 'D')){

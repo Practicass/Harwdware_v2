@@ -73,7 +73,7 @@ void linea_serie_drv_enviar_array(uint8_t cadena[]){
     
     // se almacena la cadena en el buffer de salida
     contadorAux = 0;
-		while(cadena[contadorAux] != '%'){                      // se recorre la cadena hasta encontrar el caracter '%' (fin de cadena)
+		while(cadena[contadorAux] != '\0'){                      // se recorre la cadena hasta encontrar el caracter '\0' (fin de cadena)
 			bufferSalida[contadorAux] = cadena[contadorAux];
 			contadorAux++;
 		}
