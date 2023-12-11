@@ -4,7 +4,7 @@ num_columnas    EQU     7
 max_no_cero     EQU     6
 
 	AREA codigo,CODE, READONLY
-	ENTRY
+	
 	IMPORT tablero_buscar_color
 	EXPORT conecta_K_buscar_alineamiento_arm
 	PRESERVE8

@@ -9,7 +9,7 @@ max_no_cero     EQU     6
 	AREA codigo,CODE, READONLY
 	EXPORT conecta_K_hay_linea_arm_arm
 	PRESERVE8
-	ENTRY
+	;ENTRY
 conecta_K_hay_linea_arm_arm
 	STMDB     R13!,{R4-R10,R14}			
 	SUB       R13,R13,#0x00000024

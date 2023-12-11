@@ -5,7 +5,7 @@ n_deltas        EQU     4
 k_size          EQU     4
 
 	AREA codigo,CODE, READONLY
-	ENTRY
+	;
 	IMPORT conecta_K_buscar_alineamiento_c
 	EXPORT conecta_K_hay_linea_arm_c
 	PRESERVE8
