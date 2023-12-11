@@ -410,7 +410,7 @@ void mostrar_estadisticas(){
 
 //introduce en el buffer el mensaje con las indicaciones para empezar una nueva partida y devuelve el nuevo indice del buffer 
 void mostrar_volver_a_jugar(){
-	uint8_t bufferMsg[120] = "****************************\nINTRODUCE EL COMANDO $NEW! PARA VOLVER A JUGAR\n****************************\n\n\0";
+	uint8_t bufferMsg[135] = "****************************\nINTRODUCE EL COMANDO $NEW! O \nPULSA CUALQUIER BOTON PARA VOLVER A JUGAR\n****************************\n\n\0";
 	indexFinal = concatenar_array(bufferMsgFinal,bufferMsg,indexFinal);
 	bufferMsgFinal[indexFinal] = '\0';									//se introduce el caracter de fin de buffer
 	indexFinal +=  1;										//devuelve el nuevo indice del buffer
