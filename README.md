@@ -1,9 +1,9 @@
-#Proyecto Hardware
+# Proyecto Hardware
 
-##Proyecto de la asignatura Proyecto Hardware de la Universidad de Zaragoza.
+## Proyecto de la asignatura Proyecto Hardware de la Universidad de Zaragoza.
 Juego conecta K desarrollado en C y ARM. Se ha desarrollado utilizando el simulador *keil uvision*
 
-##Colaboradores
+## Colaboradores
 Pablo Ernesto Angusto Delgado
 
 Miguel Aréjula Aísa
